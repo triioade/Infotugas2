@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "../../icons";
+import {  EyeCloseIcon, EyeIcon } from "../../icons";
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
 import Checkbox from "../form/input/Checkbox";
@@ -69,13 +69,7 @@ export default function SignInForm() {
       <div className="absolute inset-0 bg-black/60 dark:bg-black/30 z-0" />
       <div className="w-full max-w-md pt-10 mx-auto relative z-10">
         <div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto bg-white dark:bg-gray-900 px-6 py-10 rounded-lg shadow-lg mt-6">
-          <Link
-            to="/"
-            className="inline-flex items-center mb-4 text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-          >
-            <ChevronLeftIcon className="size-5" />
-            Kembali ke dashboard
-          </Link>
+
 
           <div>
             <div className="mb-5 sm:mb-8">
