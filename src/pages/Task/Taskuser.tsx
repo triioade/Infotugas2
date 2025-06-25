@@ -48,28 +48,27 @@ export default function TaskPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    fetchTasks();
-  }, []);
+useEffect(() => {
+  const token = Cookies.get("token");
+  if (token) {
+    fetchTasks(token);
+  }
+}, []);
 
-  const fetchTasks = async () => {
-    setLoading(true);
-    const token = Cookies.get("token");
+const fetchTasks = async (token: string) => {
+  setLoading(true);
+  try {
+    const res = await axios.get(`${API_URL}/task`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    setTasks(res.data.data);
+  } catch (err) {
+    console.error("Gagal fetch tugas:", err);
+    setTasks([]);
+  }
+  setLoading(false);
+};
 
-    try {
-      const res = await axios.get(`${API_URL}/task`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      const taskList: Task[] = res.data.data;
-      setTasks(taskList);
-    } catch (err) {
-      console.error("Gagal fetch tugas:", err);
-      setTasks([]);
-    }
-
-    setLoading(false);
-  };
 
 const handleChangeStatus = (taskId: string, currentStatus: boolean) => {
   setTasks((prevTasks) =>
