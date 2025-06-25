@@ -44,10 +44,20 @@ export default function SignUpForm() {
       Cookies.set("token", token, { expires: isChecked ? 7 : undefined });
 
       navigate("/task");
-    } catch (err: any) {
-      const msg = err?.response?.data?.message || "Pendaftaran gagal";
-      setError(msg);
-    }
+} catch (err: any) {
+  let msg = "Terjadi kesalahan saat login";
+
+  if (err?.response?.status === 400) {
+    msg = "Pendaftaran gagal Coba cek lagi";
+  } else if (err?.response?.status === 500) {
+    msg = "Pendaftaran gagal Coba cek lagi";
+  } else if (err?.response?.data?.message) {
+    msg = err.response.data.message;
+  }
+
+  setError(msg);
+  console.error(err);
+}
 
     setLoading(false);
   };

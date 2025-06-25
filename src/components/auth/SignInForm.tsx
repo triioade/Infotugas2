@@ -53,13 +53,23 @@ export default function SignInForm() {
         return;
       }
 
-      setError(data.message || "Login gagal");
-    } catch (err: any) {
-      const msg =
-        err?.response?.data?.message || "Terjadi kesalahan saat login";
-      setError(msg);
-      console.error(err);
-    }
+      
+} catch (err: any) {
+  let msg = "Terjadi kesalahan saat login";
+
+  if (err?.response?.status === 400) {
+    msg = "Ada yang salah coba cek lagi";
+  } else if (err?.response?.status === 500) {
+    msg = "Ada yang salah coba cek lagi";
+  } else if (err?.response?.data?.message) {
+    msg = err.response.data.message;
+  }
+
+  setError(msg);
+  console.error(err);
+}
+
+
 
     setLoading(false);
   };
@@ -74,7 +84,7 @@ export default function SignInForm() {
           <div>
             <div className="mb-5 sm:mb-8">
               <h1 className="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md">
-                Masuk Admin
+                Masuk Akun
               </h1>
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 Masukkan NIM dan kata sandi untuk masuk!
