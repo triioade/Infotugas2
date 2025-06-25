@@ -71,24 +71,37 @@ export default function TaskPage() {
     setLoading(false);
   };
 
-  const handleChangeStatus = async (taskId: string, currentStatus: boolean) => {
-    const token = Cookies.get("token");
-    try {
-      await axios.post(
-        `${API_URL}/task/status/${taskId}`,
-        { status: !currentStatus },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
+const handleChangeStatus = (taskId: string, currentStatus: boolean) => {
+  setTasks((prevTasks) =>
+    prevTasks.map((task) =>
+      task.taskId === taskId ? { ...task, status: !currentStatus } : task
+    )
+  );
+
+  const token = Cookies.get("token");
+  axios
+    .post(
+      `${API_URL}/task/status/${taskId}`,
+      { status: !currentStatus },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    )
+    .catch((err) => {
+      setTasks((prevTasks) =>
+        prevTasks.map((task) =>
+          task.taskId === taskId ? { ...task, status: currentStatus } : task
+        )
       );
-      fetchTasks(); // refresh status setelah diubah
-    } catch (err) {
       alert("Gagal mengubah status tugas");
-    }
-  };
+      console.error("Status update failed:", err);
+    });
+};
+
+
 
   const doneCount = tasks.filter((t) => t.status).length;
   const progress =

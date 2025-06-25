@@ -7,7 +7,7 @@ import Checkbox from "../form/input/Checkbox";
 import Button from "../ui/button/Button";
 import Cookies from "js-cookie";
 import axios from "axios";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import { API_URL } from "../../utils/APIURL";
 
 export default function SignInForm() {
@@ -30,7 +30,7 @@ export default function SignInForm() {
         { nim, password },
         { headers: { "Content-Type": "application/json" } }
       );
-
+      const isLocal = window.location.hostname === "localhost";
       const data = res.data;
 
       if (res.status === 200 && data.token) {
@@ -41,7 +41,10 @@ export default function SignInForm() {
         const userFullname = decoded.fullname;
         const userProdi = decoded.prodi?.[0] || "";
 
-        Cookies.set("token", token, { expires: isChecked ? 7 : undefined });
+        Cookies.set("token", token, {
+          expires: isChecked ? 7 : undefined,
+          secure: !isLocal,
+        });
         Cookies.set("nim", userNim);
         Cookies.set("fullname", userFullname);
         Cookies.set("prodi", userProdi);
@@ -52,7 +55,8 @@ export default function SignInForm() {
 
       setError(data.message || "Login gagal");
     } catch (err: any) {
-      const msg = err?.response?.data?.message || "Terjadi kesalahan saat login";
+      const msg =
+        err?.response?.data?.message || "Terjadi kesalahan saat login";
       setError(msg);
       console.error(err);
     }
