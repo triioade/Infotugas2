@@ -7,6 +7,7 @@ import TaskUserPage from "./pages/Task/Taskuser";
 import ProtectedRoute from "./protectroute";
 import UpdateEmailPage from "./pages/email/email";
 
+
 import SignUp from "./pages/AuthPages/SignUp";
 export default function App() {
   return (
@@ -19,9 +20,22 @@ export default function App() {
         <Route path="/signup" element={<SignUp />} />
         {/* Protected Routes inside Dashboard Layout */}
         <Route element={<AppLayout />}>
-          <Route path="/profile" element={<UpdateEmailPage />} />
-          <Route path="/task" element={<TaskUserPage />} />
-        </Route>
+          <Route
+    path="/task"
+    element={
+      <ProtectedRoute>
+        <TaskUserPage />
+      </ProtectedRoute>
+    }
+  />
+  <Route
+    path="/profile"
+    element={
+      <ProtectedRoute>
+        <UpdateEmailPage />
+      </ProtectedRoute>
+    }
+  />
 
         {/* Fallback */}
         <Route path="*" element={<NotFound />} />

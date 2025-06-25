@@ -1,23 +1,27 @@
-import React, { useEffect, useState } from 'react';
-import Cookies from 'js-cookie';
-import { useNavigate, Outlet } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import Cookies from "js-cookie";
+import { useNavigate } from "react-router-dom";
 
-const ProtectRoutes = () => {
+interface ProtectedRouteProps {
+  children: React.ReactNode;
+}
+
+const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const navigate = useNavigate();
-  const [checked, setChecked] = useState(false);
+  const [authorized, setAuthorized] = useState(false);
 
   useEffect(() => {
     const token = Cookies.get("token");
     if (!token) {
-      navigate("/", { replace: true });
+      navigate("/signin", { replace: true });
     } else {
-      setChecked(true);
+      setAuthorized(true);
     }
   }, [navigate]);
 
-  if (!checked) return null; 
+  if (!authorized) return null; // optionally return loading
 
-  return <Outlet />;
+  return <>{children}</>;
 };
 
-export default ProtectRoutes;
+export default ProtectedRoute;

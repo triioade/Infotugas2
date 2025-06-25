@@ -6,8 +6,6 @@ import {
   ChevronDownIcon,
   HorizontaLDots,
   UserIcon,
-
-  TaskIcon,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 
@@ -254,10 +252,15 @@ const AppSidebar: React.FC = () => {
       >
         <div
           className="flex items-center cursor-pointer"
-          onClick={() => {
-            const token = Cookies.get("token");
-            navigate("/task");
-          }}
+onClick={() => {
+  const token = Cookies.get("token");
+  if (token) {
+    navigate("/task");
+  } else {
+    navigate("/signin");
+  }
+}}
+
         >
           {isExpanded || isHovered || isMobileOpen ? (
             <>

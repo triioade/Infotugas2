@@ -109,11 +109,11 @@ export default function ProfileAndSchedulePage() {
     ? jwtDecode<DecodedToken>(token)
     : ({} as DecodedToken);
 
-  const defaultEmail = Cookies.get("email") || "";
-  const defaultNim = decoded?.username || "";
+  // const defaultEmail = Cookies.get("email") || "";
+  // const defaultNim = decoded?.username || "";
 
   const [showChangeEmail, setShowChangeEmail] = useState(false);
-  const [nim] = useState(defaultNim);
+  // const [nim] = useState(defaultNim);
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<null | {
