@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "../../icons";
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
@@ -7,7 +7,7 @@ import Checkbox from "../form/input/Checkbox";
 import Button from "../ui/button/Button";
 import Cookies from "js-cookie";
 import axios from "axios";
-import { jwtDecode } from "jwt-decode";
+import {jwtDecode} from "jwt-decode";
 import { API_URL } from "../../utils/APIURL";
 
 export default function SignInForm() {
@@ -17,7 +17,7 @@ export default function SignInForm() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,12 +46,7 @@ export default function SignInForm() {
         Cookies.set("fullname", userFullname);
         Cookies.set("prodi", userProdi);
 
-        // Trigger hidden form to allow password save prompt
-        setTimeout(() => {
-          const form = document.getElementById("realLoginForm") as HTMLFormElement;
-          if (form) form.submit();
-        }, 100); // Delay to let cookies set first
-
+        navigate("/task");
         return;
       }
 
@@ -78,110 +73,99 @@ export default function SignInForm() {
             Kembali ke dashboard
           </Link>
 
-          <div className="mb-5 sm:mb-8">
-            <h1 className="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md">
-              Masuk Admin
-            </h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Masukkan NIM dan kata sandi untuk masuk!
-            </p>
-          </div>
+          <div>
+            <div className="mb-5 sm:mb-8">
+              <h1 className="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md">
+                Masuk Admin
+              </h1>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Masukkan NIM dan kata sandi untuk masuk!
+              </p>
+            </div>
 
-          <form onSubmit={handleLogin} autoComplete="on">
-            <div className="space-y-6">
-              <div>
-                <Label>NIM <span className="text-error-500">*</span></Label>
-                <Input
-                  name="username"
-                  autoComplete="username"
-                  placeholder="241011xxxx"
-                  value={nim}
-                  onChange={(e) => setNim(e.target.value)}
-                />
-              </div>
-              <div>
-                <Label>Kata Sandi <span className="text-error-500">*</span></Label>
-                <div className="relative">
+            <form onSubmit={handleLogin}>
+              <div className="space-y-6">
+                <div>
+                  <Label>
+                    NIM <span className="text-error-500">*</span>
+                  </Label>
                   <Input
-                    name="password"
-                    autoComplete="current-password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Masukkan kata sandi"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="241011xxxx"
+                    value={nim}
+                    onChange={(e) => setNim(e.target.value)}
                   />
-                  <span
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute z-30 -translate-y-1/2 cursor-pointer right-4 top-1/2"
+                </div>
+                <div>
+                  <Label>
+                    Kata Sandi <span className="text-error-500">*</span>
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Masukkan kata sandi"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                    />
+                    <span
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute z-30 -translate-y-1/2 cursor-pointer right-4 top-1/2"
+                    >
+                      {showPassword ? (
+                        <EyeIcon className="fill-gray-500 dark:fill-gray-400 size-5" />
+                      ) : (
+                        <EyeCloseIcon className="fill-gray-500 dark:fill-gray-400 size-5" />
+                      )}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Checkbox checked={isChecked} onChange={setIsChecked} />
+                    <span className="block font-normal text-gray-700 text-theme-sm dark:text-gray-400">
+                      Tetap masuk
+                    </span>
+                  </div>
+                  <Link
+                    to="/signup"
+                    className="text-brand-500 hover:text-brand-600 dark:text-brand-400"
                   >
-                    {showPassword ? (
-                      <EyeIcon className="fill-gray-500 dark:fill-gray-400 size-5" />
-                    ) : (
-                      <EyeCloseIcon className="fill-gray-500 dark:fill-gray-400 size-5" />
-                    )}
-                  </span>
+                    Daftar
+                  </Link>
+                </div>
+
+                {error && <div className="text-error-500 text-sm">{error}</div>}
+
+                <div>
+                  <Button className="w-full" size="sm" disabled={loading}>
+                    {loading ? "Loading..." : "Masuk"}
+                  </Button>
                 </div>
               </div>
+            </form>
 
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Checkbox checked={isChecked} onChange={setIsChecked} />
-                  <span className="block font-normal text-gray-700 text-theme-sm dark:text-gray-400">
-                    Tetap masuk
-                  </span>
-                </div>
+            <div className="mt-5 text-sm text-gray-700 dark:text-gray-400">
+              Kritik Dan Saran? Hubungi Admin
+              <p>
                 <Link
-                  to="/signup"
+                  to="https://github.com/NandaCoba"
                   className="text-brand-500 hover:text-brand-600 dark:text-brand-400"
                 >
-                  Daftar
+                  Ananda Lukman (Backend)
                 </Link>
-              </div>
-
-              {error && <div className="text-error-500 text-sm">{error}</div>}
-
-              <div>
-                <Button className="w-full" size="sm" disabled={loading}>
-                  {loading ? "Loading..." : "Masuk"}
-                </Button>
-              </div>
+              </p>
+              <p>
+                <Link
+                  to="https://github.com/triioade"
+                  className="text-brand-500 hover:text-brand-600 dark:text-brand-400"
+                >
+                  Trio Ade (Frontend)
+                </Link>
+              </p>
             </div>
-          </form>
-
-          <div className="mt-5 text-sm text-gray-700 dark:text-gray-400">
-            Kritik Dan Saran? Hubungi Admin
-            <p>
-              <Link
-                to="https://github.com/NandaCoba"
-                className="text-brand-500 hover:text-brand-600 dark:text-brand-400"
-              >
-                Ananda Lukman (Backend)
-              </Link>
-            </p>
-            <p>
-              <Link
-                to="https://github.com/triioade"
-                className="text-brand-500 hover:text-brand-600 dark:text-brand-400"
-              >
-                Trio Ade (Frontend)
-              </Link>
-            </p>
           </div>
         </div>
       </div>
-
-      {/* Hidden form to trick browser into offering password save */}
-      <form
-        id="realLoginForm"
-        action="/"
-        method="POST"
-        autoComplete="on"
-        style={{ display: "none" }}
-      >
-        <input name="username" value={nim} readOnly />
-        <input name="password" value={password} type="password" readOnly />
-        <button type="submit">Submit</button>
-      </form>
     </div>
   );
 }

@@ -1,11 +1,6 @@
 import type React from "react";
-import type { FC,InputHTMLAttributes  } from "react";
+import type { FC } from "react";
 
-interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
-  success?: boolean;
-  error?: boolean;
-  hint?: string;
-}
 interface InputProps {
   type?: "text" | "number" | "email" | "password" | "date" | "time" | string;
   id?: string;
