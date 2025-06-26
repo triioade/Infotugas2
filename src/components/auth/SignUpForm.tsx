@@ -41,9 +41,14 @@ export default function SignUpForm() {
 
       const token = res.data.token;
 
-      Cookies.set("token", token, { expires: isChecked ? 7 : undefined });
+ Cookies.set("token", token, {
+  expires: 7,
+  secure: true,
+  sameSite: "Lax", 
+});
 
-      navigate("/task");
+
+      navigate("/signin");
 } catch (err: any) {
   let msg = "Terjadi kesalahan saat login";
 

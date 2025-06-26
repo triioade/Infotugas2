@@ -8,18 +8,23 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const navigate = useNavigate();
-  const [authorized, setAuthorized] = useState(false);
+  const [authorized, setAuthorized] = useState<null | boolean>(null);
 
   useEffect(() => {
     const token = Cookies.get("token");
     if (!token) {
       navigate("/signin", { replace: true });
+      setAuthorized(false);
     } else {
       setAuthorized(true);
     }
   }, [navigate]);
 
-  if (!authorized) return null; // optionally return loading
+  if (authorized === null) {
+    return <div>Loading...</div>; // atau spinner
+  }
+
+  if (!authorized) return null;
 
   return <>{children}</>;
 };
