@@ -49,7 +49,7 @@ export default function SignInForm() {
         Cookies.set("fullname", userFullname);
         Cookies.set("prodi", userProdi);
 
-        navigate("/signin");
+        navigate("/task");
         return;
       }
 
