@@ -6,8 +6,8 @@ export default function SignIn() {
   return (
     <>
       <PageMeta
-        title="Pengingat Tugas - Teknik Informatika Universitas Pamulangsa"
-        description="Website pengingat tugas semester bagi mahasiswa Teknik Informatika Universitas Pamulangsa"
+        title="Info Tugas | Dashboard MahasiswaPamulangsa"
+        description="Website pengingat tugas semester bagi mahasiswa Teknik Informatika Universitas Pamulang"
       />
       <AuthLayout>
         <SignInForm />
