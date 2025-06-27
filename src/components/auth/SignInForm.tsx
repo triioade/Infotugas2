@@ -156,7 +156,7 @@ export default function SignInForm() {
               Kritik Dan Saran? Hubungi Admin
               <p>
                 <Link
-                  to="https://github.com/NandaCoba"
+                  to="https://wa.me/+628811823475"
                   className="text-brand-500 hover:text-brand-600 dark:text-brand-400"
                 >
                   Ananda Lukman (Backend)
@@ -164,7 +164,7 @@ export default function SignInForm() {
               </p>
               <p>
                 <Link
-                  to="https://github.com/triioade"
+                  to="https://wa.me/+6281381118256"
                   className="text-brand-500 hover:text-brand-600 dark:text-brand-400"
                 >
                   Trio Ade (Frontend)

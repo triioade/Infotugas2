@@ -83,7 +83,7 @@ export default function SignUpForm() {
               Daftar Akun
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Masukkan data Anda untuk membuat akun!
+              Masukkan data sesuai akun Mentari anda untuk membuat akun!
             </p>
           </div>
 
