@@ -19,60 +19,60 @@ export default function SignInForm() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
+const handleLogin = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setLoading(true);
+  setError("");
 
-    try {
-      const res = await axios.post(
-        `${API_URL}/auth/login`,
-        { nim, password },
-        { headers: { "Content-Type": "application/json" } }
-      );
-      const isLocal = window.location.hostname === "localhost";
-      const data = res.data;
+  try {
+// disini delaynya
+    await new Promise((resolve) => setTimeout(resolve,200));
 
-      if (res.status === 200 && data.token) {
-        const token = data.token;
+    const res = await axios.post(
+      `${API_URL}/auth/login`,
+      { nim, password },
+      { headers: { "Content-Type": "application/json" } }
+    );
+    const isLocal = window.location.hostname === "localhost";
+    const data = res.data;
 
-        const decoded: any = jwtDecode(token);
-        const userNim = decoded.username;
-        const userFullname = decoded.fullname;
-        const userProdi = decoded.prodi?.[0] || "";
+    if (res.status === 200 && data.token) {
+      const token = data.token;
 
-        Cookies.set("token", token, {
-          expires: isChecked ? 7 : undefined,
-          secure: !isLocal,
-        });
-        Cookies.set("nim", userNim);
-        Cookies.set("fullname", userFullname);
-        Cookies.set("prodi", userProdi);
+      const decoded: any = jwtDecode(token);
+      const userNim = decoded.username;
+      const userFullname = decoded.fullname;
+      const userProdi = decoded.prodi?.[0] || "";
 
-        navigate("/task");
-        return;
-      }
+      Cookies.set("token", token, {
+        expires: isChecked ? 7 : undefined,
+        secure: !isLocal,
+      });
+      Cookies.set("nim", userNim);
+      Cookies.set("fullname", userFullname);
+      Cookies.set("prodi", userProdi);
 
-      
-} catch (err: any) {
-  let msg = "Terjadi kesalahan saat login";
+      navigate("/task");
+      return;
+    }
+  } catch (err: any) {
+    let msg = "Terjadi kesalahan saat login";
 
-  if (err?.response?.status === 400) {
-    msg = "Ada yang salah coba cek lagi";
-  } else if (err?.response?.status === 500) {
-    msg = "Ada yang salah coba cek lagi";
-  } else if (err?.response?.data?.message) {
-    msg = err.response.data.message;
+    if (err?.response?.status === 400) {
+      msg = "Ada yang salah coba cek lagi";
+    } else if (err?.response?.status === 500) {
+      msg = "Ada yang salah coba cek lagi";
+    } else if (err?.response?.data?.message) {
+      msg = err.response.data.message;
+    }
+
+    setError(msg);
+    console.error(err);
   }
 
-  setError(msg);
-  console.error(err);
-}
+  setLoading(false);
+};
 
-
-
-    setLoading(false);
-  };
 
   return (
     <div className="flex flex-col flex-1 min-h-screen justify-center items-center relative bg-left bg-no-repeat bg-cover bg-[url('/images/background/klh.png')] dark:bg-[url('/images/background/klhn.png')]">
@@ -145,9 +145,36 @@ export default function SignInForm() {
                 {error && <div className="text-error-500 text-sm">{error}</div>}
 
                 <div>
-                  <Button className="w-full" size="sm" disabled={loading}>
-                    {loading ? "Loading..." : "Masuk"}
-                  </Button>
+<Button className="w-full flex items-center justify-center gap-2" size="sm" disabled={loading}>
+  {loading ? (
+    <>
+      <svg
+        className="w-4 h-4 animate-spin text-white"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <circle
+          className="opacity-25"
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          strokeWidth="4"
+        />
+        <path
+          className="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+        />
+      </svg>
+      Memproses...
+    </>
+  ) : (
+    "Masuk"
+  )}
+</Button>
+
                 </div>
               </div>
             </form>

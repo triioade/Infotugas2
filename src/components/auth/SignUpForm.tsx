@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router";
-import {  EyeCloseIcon, EyeIcon } from "../../icons";
+import { EyeCloseIcon, EyeIcon } from "../../icons";
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
 import Checkbox from "../form/input/Checkbox";
@@ -13,6 +13,7 @@ import { API_URL } from "../../utils/APIURL";
 export default function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [nim, setNim] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -22,12 +23,18 @@ export default function SignUpForm() {
   const navigate = useNavigate();
 
   const handleSignUp = async (e: React.FormEvent) => {
+    
     e.preventDefault();
     setError("");
     setLoading(true);
 
     if (!nim || !email || !password) {
       setError("Semua field wajib diisi!");
+      setLoading(false);
+      return;
+    }
+    if (!isChecked) {
+      setError("Anda harus menyetujui syarat & ketentuan terlebih dahulu.");
       setLoading(false);
       return;
     }
@@ -40,29 +47,27 @@ export default function SignUpForm() {
       });
 
       const token = res.data.token;
-
- Cookies.set("token", token, {
-  expires: 7,
-  secure: true,
-  sameSite: "Lax", 
-});
-
+      Cookies.set("token", token, {
+        expires: 7,
+        secure: true,
+        sameSite: "Lax",
+      });
 
       navigate("/signin");
-} catch (err: any) {
-  let msg = "Terjadi kesalahan saat login";
+    } catch (err: any) {
+      let msg = "Terjadi kesalahan saat login";
 
-  if (err?.response?.status === 400) {
-    msg = "Pendaftaran gagal Coba cek lagi";
-  } else if (err?.response?.status === 500) {
-    msg = "Pendaftaran gagal Coba cek lagi";
-  } else if (err?.response?.data?.message) {
-    msg = err.response.data.message;
-  }
+      if (err?.response?.status === 400) {
+        msg = "Pendaftaran gagal, coba cek lagi.";
+      } else if (err?.response?.status === 500) {
+        msg = "Pendaftaran gagal, coba cek lagi.";
+      } else if (err?.response?.data?.message) {
+        msg = err.response.data.message;
+      }
 
-  setError(msg);
-  console.error(err);
-}
+      setError(msg);
+      console.error(err);
+    }
 
     setLoading(false);
   };
@@ -77,7 +82,7 @@ export default function SignUpForm() {
       <div className="absolute inset-0 bg-black/60 dark:bg-black/30 z-0" />
       <div className="w-full max-w-md pt-10 mx-auto relative z-10">
         <div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto bg-white dark:bg-gray-900 px-6 py-10 rounded-lg shadow-lg mt-6">
-
+          {/* Header */}
           <div className="mb-5 sm:mb-8">
             <h1 className="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md">
               Daftar Akun
@@ -87,6 +92,7 @@ export default function SignUpForm() {
             </p>
           </div>
 
+          {/* Form */}
           <form onSubmit={handleSignUp}>
             <div className="space-y-6">
               <div>
@@ -134,23 +140,58 @@ export default function SignUpForm() {
                 </div>
               </div>
 
+              {/* Agreement */}
               <div className="flex items-center gap-3">
                 <Checkbox checked={isChecked} onChange={setIsChecked} />
                 <span className="block font-normal text-gray-700 text-theme-sm dark:text-gray-400">
-                  Saya menyetujui syarat & ketentuan
+                  Saya menyetujui{" "}
+                  <button
+                    type="button"
+                    onClick={() => setShowModal(true)}
+                    className="text-brand-500 hover:text-brand-600 dark:text-brand-400 underline"
+                  >
+                    syarat & ketentuan
+                  </button>
                 </span>
               </div>
 
               {error && <div className="text-error-500 text-sm">{error}</div>}
 
               <div>
-                <Button className="w-full" size="sm" disabled={loading}>
-                  {loading ? "Loading..." : "Daftar"}
-                </Button>
+<Button className="w-full flex items-center justify-center gap-2" size="sm" disabled={loading}>
+  {loading ? (
+    <>
+      <svg
+        className="w-4 h-4 animate-spin text-white"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <circle
+          className="opacity-25"
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          strokeWidth="4"
+        />
+        <path
+          className="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+        />
+      </svg>
+      Memproses...
+    </>
+  ) : (
+    "Daftar"
+  )}
+</Button>
               </div>
             </div>
           </form>
 
+          {/* Footer */}
           <div className="mt-5 text-center text-sm text-gray-700 dark:text-gray-400">
             Sudah punya akun?{" "}
             <Link
@@ -162,6 +203,66 @@ export default function SignUpForm() {
           </div>
         </div>
       </div>
+
+      {/* Modal Syarat & Ketentuan */}
+      {showModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 px-4">
+          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg max-w-md w-full p-6">
+            <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-3">
+              Syarat & Ketentuan
+            </h2>
+            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed mb-4 space-y-3">
+              <span className="block">
+                🔒{" "}
+                <span className="font-semibold text-brand-500">
+                  Keamanan Terjamin
+                </span>{" "}
+                — Kami{" "}
+                <span className="font-semibold">tidak menyimpan password</span>{" "}
+                Anda. Login dilakukan langsung melalui sistem{" "}
+                <span className="font-semibold">Mentari UNPAM</span>.
+              </span>
+
+              <span className="block">
+                📧{" "}
+                <span className="font-semibold text-brand-500">
+                  Data yang Disimpan
+                </span>{" "}
+                — Hanya <span className="font-semibold">NIM</span> dan{" "}
+                <span className="font-semibold">Email</span> Anda yang kami
+                simpan, untuk keperluan pencatatan sesuai aturan sistem.
+              </span>
+
+              <span className="block">
+                ✅{" "}
+                <span className="font-semibold text-brand-500">
+                  Persetujuan
+                </span>{" "}
+                — Dengan mencentang syarat & ketentuan, Anda memahami dan
+                menyetujui kebijakan ini.
+              </span>
+            </p>
+            <div className="flex justify-end gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setShowModal(false)}
+              >
+                Tutup
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => {
+                  setIsChecked(true);
+                  setShowModal(false);
+                }}
+              >
+                Saya Setuju
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
