@@ -22,55 +22,61 @@ export default function SignUpForm() {
 
   const navigate = useNavigate();
 
-  const handleSignUp = async (e: React.FormEvent) => {
-    
-    e.preventDefault();
-    setError("");
-    setLoading(true);
+const handleSignUp = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setError("");
+  setLoading(true);
 
-    if (!nim || !email || !password) {
-      setError("Semua field wajib diisi!");
+  if (!nim || !email || !password) {
+    setError("Semua field wajib diisi!");
+    setLoading(false);
+    return;
+  }
+  if (!isChecked) {
+    setError("Anda harus menyetujui syarat & ketentuan terlebih dahulu.");
+    setLoading(false);
+    return;
+  }
+
+  try {
+    const res = await axios.post(`${API_URL}/auth/register`, {
+      nim,
+      email,
+      password,
+    });
+
+    const token = res.data.token;
+    Cookies.set("token", token, {
+      expires: 7,
+      secure: true,
+      sameSite: "Lax",
+    });
+
+    // kasih delay 200ms biar loading keliatan
+    setTimeout(() => {
       setLoading(false);
-      return;
-    }
-    if (!isChecked) {
-      setError("Anda harus menyetujui syarat & ketentuan terlebih dahulu.");
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const res = await axios.post(`${API_URL}/auth/register`, {
-        nim,
-        email,
-        password,
-      });
-
-      const token = res.data.token;
-      Cookies.set("token", token, {
-        expires: 7,
-        secure: true,
-        sameSite: "Lax",
-      });
-
       navigate("/signin");
-    } catch (err: any) {
-      let msg = "Terjadi kesalahan saat login";
+    }, 200);
+  } catch (err: any) {
+    let msg = "Terjadi kesalahan saat login";
 
-      if (err?.response?.status === 400) {
-        msg = "Pendaftaran gagal, coba cek lagi.";
-      } else if (err?.response?.status === 500) {
-        msg = "Pendaftaran gagal, coba cek lagi.";
-      } else if (err?.response?.data?.message) {
-        msg = err.response.data.message;
-      }
+    if (err?.response?.status === 400) {
+      msg = "Pendaftaran gagal, coba cek lagi.";
+    } else if (err?.response?.status === 500) {
+      msg = "Pendaftaran gagal, coba cek lagi.";
+    } else if (err?.response?.data?.message) {
+      msg = err.response.data.message;
+    }
 
+    // tetap kasih delay 200ms biar konsisten
+    setTimeout(() => {
+      setLoading(false);
       setError(msg);
       console.error(err);
-    }
+    }, 200);
+  }
+};
 
-    setLoading(false);
-  };
 
   return (
     <div
