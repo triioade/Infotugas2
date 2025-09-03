@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 
 interface ProtectedRouteProps {
@@ -11,7 +10,9 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const [authorized, setAuthorized] = useState<null | boolean>(null);
 
   useEffect(() => {
-    const token = Cookies.get("token");
+    // Cek token di localStorage dan sessionStorage
+    const token =
+      localStorage.getItem("token") || sessionStorage.getItem("token");
     if (!token) {
       navigate("/signin", { replace: true });
       setAuthorized(false);

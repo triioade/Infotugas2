@@ -1,11 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {  EyeCloseIcon, EyeIcon } from "../../icons";
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
 import Checkbox from "../form/input/Checkbox";
 import Button from "../ui/button/Button";
-import Cookies from "js-cookie";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import { API_URL } from "../../utils/APIURL";
@@ -18,6 +17,14 @@ export default function SignInForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const token =
+      localStorage.getItem("token") || sessionStorage.getItem("token");
+    if (token) {
+      navigate("/task");
+    }
+  }, [navigate]);
 
 const handleLogin = async (e: React.FormEvent) => {
   e.preventDefault();
@@ -33,7 +40,6 @@ const handleLogin = async (e: React.FormEvent) => {
       { nim, password },
       { headers: { "Content-Type": "application/json" } }
     );
-    const isLocal = window.location.hostname === "localhost";
     const data = res.data;
 
     if (res.status === 200 && data.token) {
@@ -44,13 +50,19 @@ const handleLogin = async (e: React.FormEvent) => {
       const userFullname = decoded.fullname;
       const userProdi = decoded.prodi?.[0] || "";
 
-      Cookies.set("token", token, {
-        expires: isChecked ? 7 : undefined,
-        secure: !isLocal,
-      });
-      Cookies.set("nim", userNim);
-      Cookies.set("fullname", userFullname);
-      Cookies.set("prodi", userProdi);
+      if (isChecked) {
+      
+        localStorage.setItem("token", token);
+        localStorage.setItem("nim", userNim);
+        localStorage.setItem("fullname", userFullname);
+        localStorage.setItem("prodi", userProdi);
+      } else {
+  
+        sessionStorage.setItem("token", token);
+        sessionStorage.setItem("nim", userNim);
+        sessionStorage.setItem("fullname", userFullname);
+        sessionStorage.setItem("prodi", userProdi);
+      }
 
       navigate("/task");
       return;
