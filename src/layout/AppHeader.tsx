@@ -1,62 +1,53 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
-import { Link } from "react-router";
 import { useSidebar } from "../context/SidebarContext";
 import { ThemeToggleButton } from "../components/common/ThemeToggleButton";
 import { jwtDecode } from "jwt-decode";
 
 const AppHeader: React.FC = () => {
   const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
-
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
   const navigate = useNavigate();
-  const handleToggle = () => {
-    if (window.innerWidth >= 1024) {
-      toggleSidebar();
-    } else {
-      toggleMobileSidebar();
-    }
-  };
-
-  const toggleApplicationMenu = () => {
-    setApplicationMenuOpen(!isApplicationMenuOpen);
-  };
-
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Masalah cihuyy
-useEffect(() => {
-  const token: any = Cookies.get("token");
-  if (!token) {
-    navigate("/", { replace: true });
-  }
-
-  const handleKeyDown = (event: KeyboardEvent) => {
-    if ((event.metaKey || event.ctrlKey) && event.key === "k") {
-      event.preventDefault();
-      inputRef.current?.focus();
-    }
+  const handleToggle = () => {
+    if (window.innerWidth >= 1024) toggleSidebar();
+    else toggleMobileSidebar();
   };
 
-  document.addEventListener("keydown", handleKeyDown);
+  const toggleApplicationMenu = () => setApplicationMenuOpen(!isApplicationMenuOpen);
 
-  return () => {
-    document.removeEventListener("keydown", handleKeyDown);
+  useEffect(() => {
+    const token = localStorage.getItem("token") || Cookies.get("token");
+    if (!token) navigate("/", { replace: true });
+  }, [navigate]);
+
+  const handleLogout = () => {
+    // Hapus semua data login
+    localStorage.removeItem("token");
+    localStorage.removeItem("nim");
+    localStorage.removeItem("fullname");
+    localStorage.removeItem("prodi");
+    localStorage.removeItem("stayLoggedIn");
+    Cookies.remove("token");
+    Cookies.remove("role");
+
+    navigate("/signin", { replace: true });
   };
-}, []);
-
 
   return (
     <header className="sticky top-0 flex w-full bg-white border-gray-200 z-99999 dark:border-gray-800 dark:bg-gray-900 lg:border-b">
       <div className="flex flex-col items-center justify-between grow lg:flex-row lg:px-6">
         <div className="flex items-center justify-between w-full gap-2 px-3 py-3 border-b border-gray-200 dark:border-gray-800 sm:gap-4 lg:justify-normal lg:border-b-0 lg:px-0 lg:py-4">
+          {/* Sidebar toggle */}
           <button
             className="items-center justify-center w-10 h-10 text-gray-500 border-gray-200 rounded-lg z-99999 dark:border-gray-800 lg:flex dark:text-gray-400 lg:h-11 lg:w-11 lg:border"
             onClick={handleToggle}
             aria-label="Toggle Sidebar"
           >
             {isMobileOpen ? (
+              /* Cross icon */
               <svg
                 width="24"
                 height="24"
@@ -72,6 +63,7 @@ useEffect(() => {
                 />
               </svg>
             ) : (
+              /* Hamburger icon */
               <svg
                 width="16"
                 height="12"
@@ -87,71 +79,38 @@ useEffect(() => {
                 />
               </svg>
             )}
-            {/* Cross Icon */}
           </button>
-          {/* Logo dan Judul (Mobile & Desktop) */}
 
+          {/* Logo / title */}
           <span
             className="flex items-center gap-3 lg:hidden cursor-pointer"
             onClick={() => {
-              const token = Cookies.get("token");
-              if (token) {
-                navigate("/task");
-              }else
-                navigate("/signin");
-              }
-            }
+              const token = localStorage.getItem("token") || Cookies.get("token");
+              if (token) navigate("/task", { replace: true });
+              else navigate("/signin", { replace: true });
+            }}
           >
-            {/* <img
-              className="dark:hidden"
-              src="./images/logo/auth-logo.svg"
-              alt="Logo"
-              style={{ width: "40px", height: "40px" }}
-            />
-            <img
-              className="hidden dark:block"
-              src="./images/logo/auth-logo.svg"
-              alt="Logo"
-              style={{ width: "40px", height: "40px" }}
-            /> */}
             <span className="text-lg font-bold text-gray-800 dark:text-white">
               Info Tugas
             </span>
           </span>
+
           <div
             className="hidden lg:flex items-center gap-3 cursor-pointer"
             onClick={() => {
-              const token = Cookies.get("token");
-              const role : any = jwtDecode("role");
-              if (token && role.role === "admin") {
-                navigate("/semester");
-              } else if (token && role.role === "user") {
-                navigate("/semester-user");
-              } else {
-                navigate("/");
-              }
+              const token = localStorage.getItem("token") || Cookies.get("token");
+              if (token) {
+                const decoded: any = jwtDecode(token);
+                if (decoded.role === "admin") navigate("/semester", { replace: true });
+                else navigate("/semester-user", { replace: true });
+              } else navigate("/signin", { replace: true });
             }}
           >
-            {/* <img
-              className="dark:hidden"
-              src="./images/logo/auth-logo.svg"
-              alt="Logo"
-              style={{ width: "40px", height: "40px" }}
-            /> */}
-            {/* <img
-              className="hidden dark:block"
-              src="./images/logo/auth-logo.svg"
-              alt="Logo"
-              style={{ width: "40px", height: "40px" }}
-            /> */}
             <span className="text-xl font-bold text-gray-800 dark:text-white">
               Info Tugas
             </span>
           </div>
-          <div className="hidden lg:flex items-center gap-3">
 
-
-          </div>
           <button
             onClick={toggleApplicationMenu}
             className="flex items-center justify-center w-10 h-10 text-gray-700 rounded-lg z-99999 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 lg:hidden"
@@ -171,23 +130,18 @@ useEffect(() => {
               />
             </svg>
           </button>
-          <div className="hidden lg:block"></div>
         </div>
+
+        {/* Menu kanan */}
         <div
           className={`${
             isApplicationMenuOpen ? "flex" : "hidden"
           } items-center justify-between w-full gap-4 px-5 py-4 lg:flex shadow-theme-md lg:justify-end lg:px-0 lg:shadow-none`}
         >
           <div className="flex items-center gap-2 2xsm:gap-3">
-            {/* <!-- Dark Mode Toggler --> */}
             <ThemeToggleButton />
-            {/* <!-- Dark Mode Toggler --> */}
-            <Link
-              onClick={() => { 
-                Cookies.remove("token")
-                Cookies.remove("role")
-               }}
-              to="/signin"
+            <button
+              onClick={handleLogout}
               className="flex items-center gap-3 px-3 py-2 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
             >
               <svg
@@ -206,9 +160,8 @@ useEffect(() => {
                 />
               </svg>
               Sign out
-            </Link>
+            </button>
           </div>
-          {/* <!-- User Area --> */}
         </div>
       </div>
     </header>

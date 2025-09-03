@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import {  EyeCloseIcon, EyeIcon } from "../../icons";
+import { EyeCloseIcon, EyeIcon } from "../../icons";
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
 import Checkbox from "../form/input/Checkbox";
@@ -8,6 +8,14 @@ import Button from "../ui/button/Button";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import { API_URL } from "../../utils/APIURL";
+
+interface DecodedToken {
+  username: string;
+  fullname: string;
+  prodi?: string[];
+  exp: number;
+  [key: string]: any;
+}
 
 export default function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -18,198 +26,181 @@ export default function SignInForm() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const token =
-      localStorage.getItem("token") || sessionStorage.getItem("token");
-    if (token) {
-      navigate("/task");
-    }
-  }, [navigate]);
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
 
-const handleLogin = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setLoading(true);
-  setError("");
+    try {
+      // Delay simulasi loading
+      await new Promise((resolve) => setTimeout(resolve, 200));
 
-  try {
-// disini delaynya
-    await new Promise((resolve) => setTimeout(resolve,200));
+      const res = await axios.post(
+        `${API_URL}/auth/login`,
+        { nim, password },
+        { headers: { "Content-Type": "application/json" } }
+      );
 
-    const res = await axios.post(
-      `${API_URL}/auth/login`,
-      { nim, password },
-      { headers: { "Content-Type": "application/json" } }
-    );
-    const data = res.data;
+      const data = res.data;
 
-    if (res.status === 200 && data.token) {
-      const token = data.token;
+      if (res.status === 200 && data.token) {
+        const token: string = data.token;
 
-      const decoded: any = jwtDecode(token);
-      const userNim = decoded.username;
-      const userFullname = decoded.fullname;
-      const userProdi = decoded.prodi?.[0] || "";
+        const decoded: DecodedToken = jwtDecode(token);
+        const userNim = decoded.username;
+        const userFullname = decoded.fullname;
+        const userProdi = decoded.prodi?.[0] || "";
 
-      if (isChecked) {
-      
+        // Simpan token dan data user di localStorage
         localStorage.setItem("token", token);
         localStorage.setItem("nim", userNim);
         localStorage.setItem("fullname", userFullname);
         localStorage.setItem("prodi", userProdi);
-      } else {
-  
-        sessionStorage.setItem("token", token);
-        sessionStorage.setItem("nim", userNim);
-        sessionStorage.setItem("fullname", userFullname);
-        sessionStorage.setItem("prodi", userProdi);
+
+        // Opsi "Tetap masuk" untuk jangka panjang
+        if (isChecked) {
+          localStorage.setItem("stayLoggedIn", "true"); // bisa cek di ProtectedRoute nanti
+        } else {
+          localStorage.removeItem("stayLoggedIn");
+        }
+
+        navigate("/task");
+        return;
       }
+    } catch (err: any) {
+      let msg = "Terjadi kesalahan saat login";
 
-      navigate("/task");
-      return;
-    }
-  } catch (err: any) {
-    let msg = "Terjadi kesalahan saat login";
+      if (err?.response?.status === 400) msg = "NIM atau password salah";
+      else if (err?.response?.status === 500) msg = "Server error, coba lagi nanti";
+      else if (err?.response?.data?.message) msg = err.response.data.message;
 
-    if (err?.response?.status === 400) {
-      msg = "Ada yang salah coba cek lagi";
-    } else if (err?.response?.status === 500) {
-      msg = "Ada yang salah coba cek lagi";
-    } else if (err?.response?.data?.message) {
-      msg = err.response.data.message;
+      setError(msg);
+      console.error(err);
     }
 
-    setError(msg);
-    console.error(err);
-  }
-
-  setLoading(false);
-};
-
+    setLoading(false);
+  };
 
   return (
     <div className="flex flex-col flex-1 min-h-screen justify-center items-center relative bg-left bg-no-repeat bg-cover bg-[url('/images/background/klh.png')] dark:bg-[url('/images/background/klhn.png')]">
       <div className="absolute inset-0 bg-black/60 dark:bg-black/30 z-0" />
       <div className="w-full max-w-md pt-10 mx-auto relative z-10">
         <div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto bg-white dark:bg-gray-900 px-6 py-10 rounded-lg shadow-lg mt-6">
+          <div className="mb-5 sm:mb-8">
+            <h1 className="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md">
+              Masuk Akun
+            </h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Masukkan NIM dan kata sandi untuk masuk!
+            </p>
+          </div>
 
+          <form onSubmit={handleLogin}>
+            <div className="space-y-6">
+              <div>
+                <Label>
+                  NIM <span className="text-error-500">*</span>
+                </Label>
+                <Input
+                  placeholder="241011xxxx"
+                  value={nim}
+                  onChange={(e) => setNim(e.target.value)}
+                />
+              </div>
 
-          <div>
-            <div className="mb-5 sm:mb-8">
-              <h1 className="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md">
-                Masuk Akun
-              </h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Masukkan NIM dan kata sandi untuk masuk!
-              </p>
-            </div>
-
-            <form onSubmit={handleLogin}>
-              <div className="space-y-6">
-                <div>
-                  <Label>
-                    NIM <span className="text-error-500">*</span>
-                  </Label>
+              <div>
+                <Label>
+                  Kata Sandi <span className="text-error-500">*</span>
+                </Label>
+                <div className="relative">
                   <Input
-                    placeholder="241011xxxx"
-                    value={nim}
-                    onChange={(e) => setNim(e.target.value)}
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Masukkan kata sandi"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                   />
-                </div>
-                <div>
-                  <Label>
-                    Kata Sandi <span className="text-error-500">*</span>
-                  </Label>
-                  <div className="relative">
-                    <Input
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Masukkan kata sandi"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                    />
-                    <span
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute z-30 -translate-y-1/2 cursor-pointer right-4 top-1/2"
-                    >
-                      {showPassword ? (
-                        <EyeIcon className="fill-gray-500 dark:fill-gray-400 size-5" />
-                      ) : (
-                        <EyeCloseIcon className="fill-gray-500 dark:fill-gray-400 size-5" />
-                      )}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Checkbox checked={isChecked} onChange={setIsChecked} />
-                    <span className="block font-normal text-gray-700 text-theme-sm dark:text-gray-400">
-                      Tetap masuk
-                    </span>
-                  </div>
-                  <Link
-                    to="/signup"
-                    className="text-brand-500 hover:text-brand-600 dark:text-brand-400"
+                  <span
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute z-30 -translate-y-1/2 cursor-pointer right-4 top-1/2"
                   >
-                    Daftar
-                  </Link>
-                </div>
-
-                {error && <div className="text-error-500 text-sm">{error}</div>}
-
-                <div>
-<Button className="w-full flex items-center justify-center gap-2" size="sm" disabled={loading}>
-  {loading ? (
-    <>
-      <svg
-        className="w-4 h-4 animate-spin text-white"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-      >
-        <circle
-          className="opacity-25"
-          cx="12"
-          cy="12"
-          r="10"
-          stroke="currentColor"
-          strokeWidth="4"
-        />
-        <path
-          className="opacity-75"
-          fill="currentColor"
-          d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-        />
-      </svg>
-      Memproses...
-    </>
-  ) : (
-    "Masuk"
-  )}
-</Button>
-
+                    {showPassword ? (
+                      <EyeIcon className="fill-gray-500 dark:fill-gray-400 size-5" />
+                    ) : (
+                      <EyeCloseIcon className="fill-gray-500 dark:fill-gray-400 size-5" />
+                    )}
+                  </span>
                 </div>
               </div>
-            </form>
 
-            <div className="mt-5 text-sm text-gray-700 dark:text-gray-400">
-              Kritik Dan Saran? Hubungi Admin
-              <p>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Checkbox checked={isChecked} onChange={setIsChecked} />
+                  <span className="block font-normal text-gray-700 text-theme-sm dark:text-gray-400">
+                    Tetap masuk
+                  </span>
+                </div>
                 <Link
-                  to="https://wa.me/+628811823475"
+                  to="/signup"
                   className="text-brand-500 hover:text-brand-600 dark:text-brand-400"
                 >
-                  Ananda Lukman (Backend)
+                  Daftar
                 </Link>
-              </p>
-              <p>
-                <Link
-                  to="https://wa.me/+6281381118256"
-                  className="text-brand-500 hover:text-brand-600 dark:text-brand-400"
-                >
-                  Trio Ade (Frontend)
-                </Link>
-              </p>
+              </div>
+
+              {error && <div className="text-error-500 text-sm">{error}</div>}
+
+              <div>
+                <Button className="w-full flex items-center justify-center gap-2" size="sm" disabled={loading}>
+                  {loading ? (
+                    <>
+                      <svg
+                        className="w-4 h-4 animate-spin text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        />
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                        />
+                      </svg>
+                      Memproses...
+                    </>
+                  ) : (
+                    "Masuk"
+                  )}
+                </Button>
+              </div>
             </div>
+          </form>
+
+          <div className="mt-5 text-sm text-gray-700 dark:text-gray-400">
+            Kritik dan Saran? Hubungi Admin
+            <p>
+              <Link
+                to="https://wa.me/+628811823475"
+                className="text-brand-500 hover:text-brand-600 dark:text-brand-400"
+              >
+                Ananda Lukman (Backend)
+              </Link>
+            </p>
+            <p>
+              <Link
+                to="https://wa.me/+6281381118256"
+                className="text-brand-500 hover:text-brand-600 dark:text-brand-400"
+              >
+                Trio Ade (Frontend)
+              </Link>
+            </p>
           </div>
         </div>
       </div>

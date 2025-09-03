@@ -6,7 +6,8 @@ import AppLayout from "./layout/AppLayout";
 import { ScrollToTop } from "./components/common/ScrollToTop";
 import TaskUserPage from "./pages/Task/Taskuser";
 import UpdateEmailPage from "./pages/email/email";
-import ProtectedRoute from "./protectroute";
+import ProtectedRoute from "./protectroute"; 
+import HomeRedirect from "./pages/Home/home";
 
 export default function App() {
   return (
@@ -14,7 +15,7 @@ export default function App() {
       <ScrollToTop />
       <Routes>
         {/* Public Routes */}
-        <Route path="/" element={<SignIn />} />
+         <Route path="/" element={<HomeRedirect />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
 
