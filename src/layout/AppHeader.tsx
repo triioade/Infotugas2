@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import { useSidebar } from "../context/SidebarContext";
@@ -9,7 +9,6 @@ const AppHeader: React.FC = () => {
   const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
   const navigate = useNavigate();
-  const inputRef = useRef<HTMLInputElement>(null);
 
   const handleToggle = () => {
     if (window.innerWidth >= 1024) toggleSidebar();
