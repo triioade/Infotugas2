@@ -1,5 +1,4 @@
 import { useState } from "react";
-import Cookies from "js-cookie";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 
@@ -114,18 +113,13 @@ const schedule = [
   },
 ];
 
-
 export default function ProfileAndSchedulePage() {
-  const token = Cookies.get("token");
+  const token = localStorage.getItem("token");
   const decoded: DecodedToken = token
     ? jwtDecode<DecodedToken>(token)
     : ({} as DecodedToken);
 
-  // const defaultEmail = Cookies.get("email") || "";
-  // const defaultNim = decoded?.username || "";
-
   const [showChangeEmail, setShowChangeEmail] = useState(false);
-  // const [nim] = useState(defaultNim);
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<null | {
@@ -149,8 +143,6 @@ export default function ProfileAndSchedulePage() {
     }
     setLoading(true);
     try {
-      console.log("URL API:", `${API_URL}/auth/update_email`);
-
       await axios.put(
         `${API_URL}/auth/update_email`,
         { email },
@@ -163,7 +155,7 @@ export default function ProfileAndSchedulePage() {
       );
 
       setMessage({ type: "success", text: "Email berhasil diperbarui!" });
-      Cookies.set("email", email);
+      localStorage.setItem("email", email);
       setEmail("");
       setShowChangeEmail(false);
     } catch (err: any) {
@@ -177,7 +169,7 @@ export default function ProfileAndSchedulePage() {
 
   const getProdiName = (prodiCode: string) => {
     const mapping: Record<string, string> = {
-      "55201": "Teknik Informatika",
+      "55201": "Teknik Informatika S1",
     };
     return mapping[prodiCode] || prodiCode;
   };
@@ -193,18 +185,18 @@ export default function ProfileAndSchedulePage() {
         <h2 className="text-lg font-semibold mb-4 text-blue-600 dark:text-blue-300">
           Profil Mahasiswa
         </h2>
-        <div className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
+        <div className="space-y-3 text-sm text-gray-700 dark:text-gray-300">
           <p>
-            <strong>NIM:</strong> {decoded.username}
+            <strong>NIM:</strong> {decoded.username || "-"}
           </p>
           <p>
-            <strong>Nama Lengkap:</strong> {decoded.fullname}
+            <strong>Nama Lengkap:</strong> {decoded.fullname || "-"}
           </p>
           <p>
-            <strong>Prodi:</strong> {getProdiName(decoded.prodi?.[0] || "")}
+            <strong>Prodi:</strong> {getProdiName(decoded.prodi?.[0] || "-")}
           </p>
           <p>
-            <strong>Role:</strong> {decoded.role}
+            <strong>Role:</strong> {decoded.role || "-"}
           </p>
         </div>
 
@@ -220,7 +212,6 @@ export default function ProfileAndSchedulePage() {
             onSubmit={handleSubmit}
             className="mt-4 space-y-4 animate-fade-in-up"
           >
-            <div></div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Email Baru
@@ -268,12 +259,12 @@ export default function ProfileAndSchedulePage() {
               <tr>
                 <th className="p-2 border">Kode</th>
                 <th className="p-2 border">Mata Kuliah</th>
-                <th className="p-2 border hidden md:table-cell">Dosen</th>
-                <th className="p-2 border hidden md:table-cell">Kelas</th>
-                <th className="p-2 border hidden md:table-cell">Hari</th>
-                <th className="p-2 border ">Waktu</th>
-                <th className="p-2 border hidden md:table-cell">Ruang</th>
-                <th className="p-2 border hidden md:table-cell">Tanggal</th>
+                <th className="p-2 border">Dosen</th>
+                <th className="p-2 border">Kelas</th>
+                <th className="p-2 border">Hari</th>
+                <th className="p-2 border">Waktu</th>
+                <th className="p-2 border">Ruang</th>
+                <th className="p-2 border">Tanggal</th>
               </tr>
             </thead>
 
@@ -282,22 +273,12 @@ export default function ProfileAndSchedulePage() {
                 <tr key={index} className="border-t dark:border-gray-700">
                   <td className="p-2 border">{item.kode}</td>
                   <td className="p-2 border">{item.matkul}</td>
-                  <td className="p-2 border hidden md:table-cell">
-                    {item.dosen}
-                  </td>
-                  <td className="p-2 border hidden md:table-cell">
-                    {item.kelas}
-                  </td>
-                  <td className="p-2 border hidden md:table-cell">
-                    {item.hari}
-                  </td>
-                  <td className="p-2 border ">
-                    {item.waktu}
-                  </td>
-                  <td className="p-2 border hidden md:table-cell">
-                    {item.ruang}
-                  </td>
-                  <td className="p-2 border hidden md:table-cell">
+                  <td className="p-2 border">{item.dosen}</td>
+                  <td className="p-2 border">{item.kelas}</td>
+                  <td className="p-2 border">{item.hari}</td>
+                  <td className="p-2 border">{item.waktu}</td>
+                  <td className="p-2 border">{item.ruang}</td>
+                  <td className="p-2 border">
                     {item.mulai} - {item.selesai}
                   </td>
                 </tr>

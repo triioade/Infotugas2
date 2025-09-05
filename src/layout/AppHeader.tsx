@@ -11,11 +11,22 @@ const AppHeader: React.FC = () => {
   const navigate = useNavigate();
 
   const handleToggle = () => {
+
+    setApplicationMenuOpen(false);
+
     if (window.innerWidth >= 1024) toggleSidebar();
     else toggleMobileSidebar();
   };
 
-  const toggleApplicationMenu = () => setApplicationMenuOpen(!isApplicationMenuOpen);
+  const toggleApplicationMenu = () => {
+
+    if (!isApplicationMenuOpen) {
+      if (isMobileOpen) toggleMobileSidebar();
+      else toggleSidebar();
+    }
+    setApplicationMenuOpen(!isApplicationMenuOpen);
+  };
+
 
   useEffect(() => {
     const token = localStorage.getItem("token") || Cookies.get("token");
@@ -23,7 +34,7 @@ const AppHeader: React.FC = () => {
   }, [navigate]);
 
   const handleLogout = () => {
-    // Hapus semua data login
+   
     localStorage.removeItem("token");
     localStorage.removeItem("nim");
     localStorage.removeItem("fullname");

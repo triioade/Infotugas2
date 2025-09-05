@@ -7,7 +7,7 @@ interface ProtectedRouteProps {
 }
 
 interface DecodedToken {
-  exp: number;       // expiry timestamp
+  exp: number;       
   [key: string]: any;
 }
 
@@ -19,7 +19,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     const checkAuth = () => {
       const token = localStorage.getItem("token");
       if (!token) {
-        // Tidak ada token → redirect ke signin
+        // klo g ada token redirect ke signin
         setAuthorized(false);
         navigate("/signin", { replace: true });
         return;
@@ -30,7 +30,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
         // Cek expiry token
         if (decoded.exp * 1000 < Date.now()) {
-          // Token expired → hapus dan redirect
+          // Token expired = hapus dan redirect
           localStorage.removeItem("token");
           localStorage.removeItem("nim");
           localStorage.removeItem("fullname");
@@ -62,7 +62,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     );
   }
 
-  if (!authorized) return null; // Tidak authorized → jangan render children
+  if (!authorized) return null; // Tidak authorize g rnder children
 
   return <>{children}</>;
 };
