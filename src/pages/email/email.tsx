@@ -253,39 +253,41 @@ export default function ProfileAndSchedulePage() {
         <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
           Jadwal Kuliah
         </h2>
-        <div className="overflow-auto rounded shadow border border-gray-300 dark:border-gray-600">
-          <table className="w-full text-sm text-left text-gray-700 dark:text-gray-300">
-            <thead className="bg-gray-100 dark:bg-gray-800">
-              <tr>
-                <th className="p-2 border">Kode</th>
-                <th className="p-2 border">Mata Kuliah</th>
-                <th className="p-2 border">Dosen</th>
-                <th className="p-2 border">Kelas</th>
-                <th className="p-2 border">Hari</th>
-                <th className="p-2 border">Waktu</th>
-                <th className="p-2 border">Ruang</th>
-                <th className="p-2 border">Tanggal</th>
-              </tr>
-            </thead>
+        {/* jadwal */}
+<div className="overflow-auto rounded shadow border border-gray-300 dark:border-gray-600">
+  <table className="w-full text-sm text-left text-gray-700 dark:text-gray-300">
+    <thead className="bg-gray-100 dark:bg-gray-800">
+      <tr>
+        <th className="p-2 border">Kode</th>
+        <th className="p-2 border">Mata Kuliah</th>
+        <th className="p-2 border">Dosen</th>
+        <th className="p-2 border">Kelas</th>
+        <th className="p-2 border">Hari</th>
+        <th className="p-2 border">Waktu</th>
+        <th className="p-2 border">Ruang</th>
+        <th className="p-2 border">Tanggal</th>
+      </tr>
+    </thead>
 
-            <tbody>
-              {schedule.map((item, index) => (
-                <tr key={index} className="border-t dark:border-gray-700">
-                  <td className="p-2 border">{item.kode}</td>
-                  <td className="p-2 border">{item.matkul}</td>
-                  <td className="p-2 border">{item.dosen}</td>
-                  <td className="p-2 border">{item.kelas}</td>
-                  <td className="p-2 border">{item.hari}</td>
-                  <td className="p-2 border">{item.waktu}</td>
-                  <td className="p-2 border">{item.ruang}</td>
-                  <td className="p-2 border">
-                    {item.mulai} - {item.selesai}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+    <tbody>
+      {schedule.map((item, index) => (
+        <tr key={index} className="border-t dark:border-gray-700">
+          <td className="p-2 border">{item.kode}</td>
+          <td className="p-2 border">{item.matkul}</td>
+          <td className="p-2 border">{item.dosen}</td>
+          <td className="p-2 border">{item.kelas}</td>
+          <td className="p-2 border">{item.hari}</td>
+          <td className="p-2 border">{item.waktu}</td>
+          <td className="p-2 border">{item.ruang}</td>
+          <td className="p-2 border">
+            {item.mulai} - {item.selesai}
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
       </div>
 
       <style>
