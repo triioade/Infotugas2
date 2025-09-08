@@ -9,6 +9,8 @@ import Button from "../ui/button/Button";
 import Cookies from "js-cookie";
 import axios from "axios";
 import { API_URL } from "../../utils/APIURL";
+import toast from "react-hot-toast";
+
 
 export default function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -53,28 +55,33 @@ const handleSignUp = async (e: React.FormEvent) => {
     });
 
     // kasih delay 200ms biar loading keliatan
-    setTimeout(() => {
-      setLoading(false);
-      navigate("/signin");
-    }, 200);
+setTimeout(() => {
+  toast.success("Pendaftaran berhasil! 🎉");
+  navigate("/signin");
+}, 200);
+
   } catch (err: any) {
-    let msg = "Terjadi kesalahan saat login";
+  let msg = "Terjadi kesalahan saat pendaftaran.";
 
-    if (err?.response?.status === 400) {
-      msg = "Pendaftaran gagal, coba cek lagi.";
-    } else if (err?.response?.status === 500) {
-      msg = "Pendaftaran gagal, coba cek lagi.";
-    } else if (err?.response?.data?.message) {
-      msg = err.response.data.message;
-    }
+  const backendMessage = err?.response?.data?.message;
 
-    // tetap kasih delay 200ms biar konsisten
-    setTimeout(() => {
-      setLoading(false);
-      setError(msg);
-      console.error(err);
-    }, 200);
+  // Mapping pesan backend ke pesan yang lebih ramah
+  if (backendMessage === "Error: user is available") {
+    msg = "Pengguna sudah terdaftar. Silakan masuk dengan akun yang ada.";
+  } else if (backendMessage) {
+    msg = backendMessage;
+  } else if (err?.response?.status === 400) {
+    msg = "Data tidak valid. Mohon periksa kembali.";
+  } else if (err?.response?.status === 500) {
+    msg = "Server sedang bermasalah. Coba beberapa saat lagi.";
   }
+
+  setTimeout(() => {
+    setLoading(false);
+    setError(msg);
+    console.error("SignUp error:", err);
+  }, 200);
+}
 };
 
 
