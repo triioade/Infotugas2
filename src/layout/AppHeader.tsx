@@ -104,15 +104,14 @@ const AppHeader: React.FC = () => {
 
           <div
             className="hidden lg:flex items-center gap-3 cursor-pointer"
-            onClick={() => {
-              const token =
-                localStorage.getItem("token") || Cookies.get("token");
-              if (token) {
-                navigate("/task", { replace: true });
-              } else {
-                navigate("/signin", { replace: true });
-              }
-            }}
+onClick={() => {
+  const token = Cookies.get("token");
+  if (token) {
+    navigate("/task");
+  } else {
+    navigate("/signin");
+  }
+}}
           >
             <span className="text-xl font-bold text-gray-800 dark:text-white">
               Info Tugas
