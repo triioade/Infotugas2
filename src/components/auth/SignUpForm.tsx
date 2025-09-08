@@ -48,10 +48,8 @@ const handleSignUp = async (e: React.FormEvent) => {
       password,
     });
 
-    if (res?.data?.token) {
-      // Tidak perlu simpan token
-
-      // Tampilkan toast sukses dengan tema brand
+ 
+    if (res.status === 200 && res?.data?.data) {
       toast.success("Pendaftaran berhasil! Silakan masuk.", {
         style: {
           background: "var(--color-brand-500, #2563eb)",
@@ -69,7 +67,7 @@ const handleSignUp = async (e: React.FormEvent) => {
       setLoading(false);
       navigate("/signin");
     } else {
-      throw new Error("Token tidak ditemukan");
+      throw new Error("Pendaftaran gagal, silakan coba lagi.");
     }
   } catch (err: any) {
     let msg = "Terjadi kesalahan saat pendaftaran.";
