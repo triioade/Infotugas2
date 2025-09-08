@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { ThreeDot } from "react-loading-indicators";
 import { parseISO, differenceInMilliseconds } from "date-fns";
-import Cookies from "js-cookie";
 
 interface Task {
   taskId: string;
@@ -48,59 +47,58 @@ export default function TaskPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(false);
 
-useEffect(() => {
-  const token = Cookies.get("token");
-  if (token) {
-    fetchTasks(token);
-  }
-}, []);
+  useEffect(() => {
+    const token = localStorage.getItem("token"); // ✅ ganti cookies → localStorage
+    console.log("Token dari localStorage:", token);
+    if (token) {
+      fetchTasks(token);
+    }
+  }, []);
 
-const fetchTasks = async (token: string) => {
-  setLoading(true);
-  try {
-    const res = await axios.get(`${API_URL}/task`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    setTasks(res.data.data);
-  } catch (err) {
-    console.error("Gagal fetch tugas:", err);
-    setTasks([]);
-  }
-  setLoading(false);
-};
+  const fetchTasks = async (token: string) => {
+    setLoading(true);
+    try {
+      const res = await axios.get(`${API_URL}/task`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      console.log("Response API:", res.data); // debug
+      setTasks(res.data.data);
+    } catch (err) {
+      console.error("Gagal fetch tugas:", err);
+      setTasks([]);
+    }
+    setLoading(false);
+  };
 
+  const handleChangeStatus = (taskId: string, currentStatus: boolean) => {
+    setTasks((prevTasks) =>
+      prevTasks.map((task) =>
+        task.taskId === taskId ? { ...task, status: !currentStatus } : task
+      )
+    );
 
-const handleChangeStatus = (taskId: string, currentStatus: boolean) => {
-  setTasks((prevTasks) =>
-    prevTasks.map((task) =>
-      task.taskId === taskId ? { ...task, status: !currentStatus } : task
-    )
-  );
-
-  const token = Cookies.get("token");
-  axios
-    .post(
-      `${API_URL}/task/status/${taskId}`,
-      { status: !currentStatus },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      }
-    )
-    .catch((err) => {
-      setTasks((prevTasks) =>
-        prevTasks.map((task) =>
-          task.taskId === taskId ? { ...task, status: currentStatus } : task
-        )
-      );
-      alert("Gagal mengubah status tugas");
-      console.error("Status update failed:", err);
-    });
-};
-
-
+    const token = localStorage.getItem("token"); // ✅ ganti cookies → localStorage
+    axios
+      .post(
+        `${API_URL}/task/status/${taskId}`,
+        { status: !currentStatus },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      )
+      .catch((err) => {
+        setTasks((prevTasks) =>
+          prevTasks.map((task) =>
+            task.taskId === taskId ? { ...task, status: currentStatus } : task
+          )
+        );
+        alert("Gagal mengubah status tugas");
+        console.error("Status update failed:", err);
+      });
+  };
 
   const doneCount = tasks.filter((t) => t.status).length;
   const progress =
@@ -108,7 +106,9 @@ const handleChangeStatus = (taskId: string, currentStatus: boolean) => {
 
   return (
     <div className="p-6 bg-white dark:bg-gray-900 min-h-screen">
-      <h1 className="text-2xl font-bold mb-4 text-gray-950 dark:text-white">Daftar Tugas</h1>
+      <h1 className="text-2xl font-bold mb-4 text-gray-950 dark:text-white">
+        Daftar Tugas
+      </h1>
 
       <h2 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white flex justify-between items-center">
         Progress
@@ -126,7 +126,10 @@ const handleChangeStatus = (taskId: string, currentStatus: boolean) => {
 
       {loading && (
         <div className="flex justify-center items-center py-10">
-          <ThreeDot color={["#32cd32", "#327fcd", "#cd32cd", "#cd8032"]} text="LOADING" />
+          <ThreeDot
+            color={["#32cd32", "#327fcd", "#cd32cd", "#cd8032"]}
+            text="LOADING"
+          />
         </div>
       )}
 
@@ -166,7 +169,9 @@ const handleChangeStatus = (taskId: string, currentStatus: boolean) => {
                       ? "bg-green-500 text-white"
                       : "bg-gray-300 text-gray-700 hover:bg-blue-500 hover:text-white"
                   }`}
-                  onClick={() => handleChangeStatus(task.taskId, task.status)}
+                  onClick={() =>
+                    handleChangeStatus(task.taskId, task.status)
+                  }
                 >
                   {task.status ? "Sudah Dikerjakan" : "Tandai Selesai"}
                 </button>
