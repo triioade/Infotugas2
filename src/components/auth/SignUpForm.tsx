@@ -6,10 +6,10 @@ import Label from "../form/Label";
 import Input from "../form/input/InputField";
 import Checkbox from "../form/input/Checkbox";
 import Button from "../ui/button/Button";
-import Cookies from "js-cookie";
 import axios from "axios";
 import { API_URL } from "../../utils/APIURL";
 import toast from "react-hot-toast";
+
 
 
 export default function SignUpForm() {
@@ -34,6 +34,7 @@ const handleSignUp = async (e: React.FormEvent) => {
     setLoading(false);
     return;
   }
+
   if (!isChecked) {
     setError("Anda harus menyetujui syarat & ketentuan terlebih dahulu.");
     setLoading(false);
@@ -47,41 +48,47 @@ const handleSignUp = async (e: React.FormEvent) => {
       password,
     });
 
-    const token = res.data.token;
-    Cookies.set("token", token, {
-      expires: 7,
-      secure: true,
-      sameSite: "Lax",
-    });
+    if (res?.data?.token) {
+      // Tidak perlu simpan token
 
-    // kasih delay 200ms biar loading keliatan
-setTimeout(() => {
-  toast.success("Pendaftaran berhasil! 🎉");
-  navigate("/signin");
-}, 200);
+      // Tampilkan toast sukses dengan tema brand
+      toast.success("Pendaftaran berhasil! Silakan masuk.", {
+        style: {
+          background: "var(--color-brand-500, #2563eb)",
+          color: "#fff",
+          borderRadius: "0.75rem",
+          fontWeight: 500,
+        },
+        iconTheme: {
+          primary: "var(--color-brand-500, #2563eb)",
+          secondary: "#fff",
+        },
+        className: "dark:bg-brand-500 dark:text-white",
+      });
 
+      setLoading(false);
+      navigate("/signin");
+    } else {
+      throw new Error("Token tidak ditemukan");
+    }
   } catch (err: any) {
-  let msg = "Terjadi kesalahan saat pendaftaran.";
+    let msg = "Terjadi kesalahan saat pendaftaran.";
+    const backendMessage = err?.response?.data?.message;
 
-  const backendMessage = err?.response?.data?.message;
+    if (backendMessage === "Error: user is available") {
+      msg = "Pengguna sudah terdaftar. Silakan masuk.";
+    } else if (backendMessage) {
+      msg = backendMessage;
+    } else if (err?.response?.status === 400) {
+      msg = "Data tidak valid. Mohon periksa kembali.";
+    } else if (err?.response?.status === 500) {
+      msg = "Server sedang bermasalah. Coba beberapa saat lagi.";
+    }
 
-  // Mapping pesan backend ke pesan yang lebih ramah
-  if (backendMessage === "Error: user is available") {
-    msg = "Pengguna sudah terdaftar. Silakan masuk dengan akun yang ada.";
-  } else if (backendMessage) {
-    msg = backendMessage;
-  } else if (err?.response?.status === 400) {
-    msg = "Data tidak valid. Mohon periksa kembali.";
-  } else if (err?.response?.status === 500) {
-    msg = "Server sedang bermasalah. Coba beberapa saat lagi.";
-  }
-
-  setTimeout(() => {
     setLoading(false);
     setError(msg);
     console.error("SignUp error:", err);
-  }, 200);
-}
+  }
 };
 
 
