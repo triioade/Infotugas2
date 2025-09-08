@@ -11,7 +11,6 @@ const AppHeader: React.FC = () => {
   const navigate = useNavigate();
 
   const handleToggle = () => {
-
     setApplicationMenuOpen(false);
 
     if (window.innerWidth >= 1024) toggleSidebar();
@@ -19,7 +18,6 @@ const AppHeader: React.FC = () => {
   };
 
   const toggleApplicationMenu = () => {
-
     if (!isApplicationMenuOpen) {
       if (isMobileOpen) toggleMobileSidebar();
       else toggleSidebar();
@@ -27,14 +25,12 @@ const AppHeader: React.FC = () => {
     setApplicationMenuOpen(!isApplicationMenuOpen);
   };
 
-
   useEffect(() => {
     const token = localStorage.getItem("token") || Cookies.get("token");
     if (!token) navigate("/", { replace: true });
   }, [navigate]);
 
   const handleLogout = () => {
-   
     localStorage.removeItem("token");
     localStorage.removeItem("nim");
     localStorage.removeItem("fullname");
@@ -95,7 +91,8 @@ const AppHeader: React.FC = () => {
           <span
             className="flex items-center gap-3 lg:hidden cursor-pointer"
             onClick={() => {
-              const token = localStorage.getItem("token") || Cookies.get("token");
+              const token =
+                localStorage.getItem("token") || Cookies.get("token");
               if (token) navigate("/task", { replace: true });
               else navigate("/signin", { replace: true });
             }}
@@ -108,12 +105,13 @@ const AppHeader: React.FC = () => {
           <div
             className="hidden lg:flex items-center gap-3 cursor-pointer"
             onClick={() => {
-              const token = localStorage.getItem("token") || Cookies.get("token");
+              const token =
+                localStorage.getItem("token") || Cookies.get("token");
               if (token) {
-                const decoded: any = jwtDecode(token);
-                if (decoded.role === "admin") navigate("/semester", { replace: true });
-                else navigate("/semester-user", { replace: true });
-              } else navigate("/signin", { replace: true });
+                navigate("/task", { replace: true });
+              } else {
+                navigate("/signin", { replace: true });
+              }
             }}
           >
             <span className="text-xl font-bold text-gray-800 dark:text-white">
