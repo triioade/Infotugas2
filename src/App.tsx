@@ -8,16 +8,28 @@ import TaskUserPage from "./pages/Task/Taskuser";
 import UpdateEmailPage from "./pages/email/email";
 import ProtectedRoute from "./protectroute"; 
 import HomeRedirect from "./pages/Home/home";
+import { Toaster } from "react-hot-toast";
 
 export default function App() {
   return (
     <Router>
       <ScrollToTop />
+<Toaster
+  position="top-center"
+  reverseOrder={false}
+  toastOptions={{
+    style: {
+      marginTop: "80px", 
+    },
+  }}
+/>
+
       <Routes>
         {/* Public Routes */}
          <Route path="/" element={<HomeRedirect />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
+        
 
         {/* Protected Routes inside Dashboard Layout */}
         <Route element={<AppLayout />}>

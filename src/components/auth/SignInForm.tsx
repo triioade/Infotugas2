@@ -8,6 +8,7 @@ import Button from "../ui/button/Button";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import { API_URL } from "../../utils/APIURL";
+// import toast from "react-hot-toast";
 
 interface DecodedToken {
   username: string;
@@ -51,31 +52,48 @@ export default function SignInForm() {
         const userFullname = decoded.fullname;
         const userProdi = decoded.prodi?.[0] || "";
 
-        // Simpan token dan data user di localStorage
         localStorage.setItem("token", token);
         localStorage.setItem("nim", userNim);
         localStorage.setItem("fullname", userFullname);
         localStorage.setItem("prodi", userProdi);
 
-        // Opsi "Tetap masuk" untuk jangka panjang
+       
         if (isChecked) {
-          localStorage.setItem("stayLoggedIn", "true"); // bisa cek di ProtectedRoute nanti
+          localStorage.setItem("stayLoggedIn", "true");
         } else {
           localStorage.removeItem("stayLoggedIn");
         }
-
+localStorage.setItem("loginSuccess", data.message || "Login berhasil!");
         navigate("/task");
         return;
       }
-    } catch (err: any) {
-      let msg = "Terjadi kesalahan saat login";
+    } 
+    
+    catch (err: any) {
+      let msg = "Terjadi kesalahan saat pendaftaran.";
+  const backendMessage = err?.response?.data?.message;
 
-      if (err?.response?.status === 400) msg = "NIM atau password salah";
-      else if (err?.response?.status === 500) msg = "Server error, coba lagi nanti";
-      else if (err?.response?.data?.message) msg = err.response.data.message;
+  if (backendMessage === "nim or password is wrong") {
+    msg = "Nim Atau Password Anda Salah, Pastikan NIM dan Password anda sesuai dengan MENTARI.";
 
-      setError(msg);
-      console.error(err);
+  } else if (backendMessage) {
+    msg = backendMessage;
+  } else if (err?.response?.status === 400) {
+    msg = "Data tidak valid. Mohon periksa kembali.";
+  } else if (err?.response?.status === 500) {
+    msg = "Server sedang bermasalah. Coba beberapa saat lagi.";
+  } else if (
+    err.code === "ERR_BAD_RESPONSE" ||
+    err.code === "Request failed with status code 500" ||
+    err.code === "ECONNABORTED" ||
+    err.code === "ETIMEDOUT" ||
+    !err.response
+  ) {
+    msg = "Tidak dapat terhubung ke server. Periksa koneksi internet atau coba lagi nanti.";
+  }
+
+  setError(msg);
+  console.error(err);
     }
 
     setLoading(false);

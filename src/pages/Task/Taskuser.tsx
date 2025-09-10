@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { ThreeDot } from "react-loading-indicators";
 import { parseISO, differenceInMilliseconds } from "date-fns";
+import toast from "react-hot-toast";
 
 interface Task {
   taskId: string;
@@ -44,12 +45,38 @@ function Countdown({ deadline }: { deadline: string }) {
 }
 
 export default function TaskPage() {
+  useEffect(() => {
+    const msg = localStorage.getItem("loginSuccess");
+    const fullname = localStorage.getItem("fullname");
+    if (msg && fullname) {
+toast.success(`Login Berhasil, Hai ${fullname}👋`, {
+  id: "login-success", 
+  style: {
+    background: "var(--color-brand-500, #2563eb)",
+    color: "#fff",
+    borderRadius: "0.75rem",
+    fontWeight: 500,
+    whiteSpace: "nowrap",    
+    overflow: "hidden",      
+    textOverflow: "ellipsis",
+    maxWidth: "280px",  
+  },
+  iconTheme: {
+    primary: "var(--color-brand-500, #2563eb)",
+    secondary: "#fff",
+  },
+  className: "dark:bg-brand-500 dark:text-white",
+});
+
+      localStorage.removeItem("loginSuccess"); 
+    }
+  }, []);
+
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem("token"); // ✅ ganti cookies → localStorage
-    console.log("Token dari localStorage:", token);
+    const token = localStorage.getItem("token");
     if (token) {
       fetchTasks(token);
     }
@@ -61,7 +88,7 @@ export default function TaskPage() {
       const res = await axios.get(`${API_URL}/task`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log("Response API:", res.data); // debug
+      
       setTasks(res.data.data);
     } catch (err) {
       console.error("Gagal fetch tugas:", err);

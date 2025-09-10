@@ -48,8 +48,9 @@ const handleSignUp = async (e: React.FormEvent) => {
       password,
     });
 
- 
-    if (res.status === 200 && res?.data?.data) {
+    console.log("Register response:", res);
+
+    if ((res.status === 200 || res.status === 201) && res.data?.message === "registration successful") {
       toast.success("Pendaftaran berhasil! Silakan masuk.", {
         style: {
           background: "var(--color-brand-500, #2563eb)",
@@ -67,27 +68,38 @@ const handleSignUp = async (e: React.FormEvent) => {
       setLoading(false);
       navigate("/signin");
     } else {
-      throw new Error("Pendaftaran gagal, silakan coba lagi.");
+      throw new Error(res.data?.message || "Pendaftaran gagal, silakan coba lagi.");
     }
-  } catch (err: any) {
-    let msg = "Terjadi kesalahan saat pendaftaran.";
-    const backendMessage = err?.response?.data?.message;
+} catch (err: any) {
+  let msg = "Terjadi kesalahan saat pendaftaran.";
+  const backendMessage = err?.response?.data?.message;
 
-    if (backendMessage === "Error: user is available") {
-      msg = "Pengguna sudah terdaftar. Silakan masuk.";
-    } else if (backendMessage) {
-      msg = backendMessage;
-    } else if (err?.response?.status === 400) {
-      msg = "Data tidak valid. Mohon periksa kembali.";
-    } else if (err?.response?.status === 500) {
-      msg = "Server sedang bermasalah. Coba beberapa saat lagi.";
-    }
+  if (backendMessage === "Error: user is available") {
+    msg = "Pengguna sudah terdaftar. Silakan masuk.";
+    
+  } else if (backendMessage === "user not exist in mentari") {
+    msg = "Pengguna Tidak Terdaftar di MENTARI. Pastikan NIM dan Password anda sesuai dengan MENTARI.";
 
-    setLoading(false);
-    setError(msg);
-    console.error("SignUp error:", err);
+  } else if (backendMessage) {
+    msg = backendMessage;
+
+  } else if (err?.response?.status === 400) {
+    msg = "Data tidak valid. Mohon periksa kembali.";
+
+  } else if (err?.response?.status === 500) {
+    msg = "Server sedang bermasalah. Coba beberapa saat lagi.";
+// ERROR JARINGAN
+  } else if (err.code === "ERR_BAD_RESPONSE" || err.code === "Request failed with status code 500" || err.code === "ECONNABORTED" || err.code === "ETIMEDOUT" || !err.response) {
+    msg = "Tidak dapat terhubung ke server. Periksa koneksi internet atau coba lagi nanti.";
   }
+
+  setLoading(false);
+  setError(msg);
+  console.error("SignUp error:", err);
+}
+
 };
+
 
 
   return (
