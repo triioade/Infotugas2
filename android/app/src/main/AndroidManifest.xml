@@ -8,6 +8,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+<meta-data
+    android:name="onesignal_app_id"
+    android:value="93156453-a01d-4d14-a5ef-8211c6e229c4" />
 
         <activity
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation"
@@ -37,5 +40,10 @@
 
     <!-- Permissions -->
 
-    <uses-permission android:name="android.permission.INTERNET" />
+<uses-permission android:name="android.permission.INTERNET"/>
+<uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+
+<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+
+
 </manifest>

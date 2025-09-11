@@ -4,4 +4,5 @@
     <string name="title_activity_main">InfoTugas</string>
     <string name="package_name">com.infotugas.app</string>
     <string name="custom_url_scheme">com.infotugas.app</string>
+        <string name="onesignal_app_id">f523ed46-9a99-46f6-8e00-34123d09140f</string>
 </resources>

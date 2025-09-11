@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import { useSidebar } from "../context/SidebarContext";
@@ -9,10 +9,10 @@ const AppHeader: React.FC = () => {
   const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
   const navigate = useNavigate();
+  const headerRef = useRef<HTMLDivElement | null>(null);
 
   const handleToggle = () => {
     setApplicationMenuOpen(false);
-
     if (window.innerWidth >= 1024) toggleSidebar();
     else toggleMobileSidebar();
   };
@@ -42,8 +42,29 @@ const AppHeader: React.FC = () => {
     navigate("/signin", { replace: true });
   };
 
+  // ✅ Tutup otomatis saat klik di luar header
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        isApplicationMenuOpen &&
+        headerRef.current &&
+        !headerRef.current.contains(event.target as Node)
+      ) {
+        setApplicationMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isApplicationMenuOpen]);
+
   return (
-    <header className="sticky top-0 flex w-full bg-white border-gray-200 z-99999 dark:border-gray-800 dark:bg-gray-900 lg:border-b">
+    <header
+      ref={headerRef}
+      className="sticky top-0 flex w-full bg-white border-gray-200 z-99999 dark:border-gray-800 dark:bg-gray-900 lg:border-b"
+    >
       <div className="flex flex-col items-center justify-between grow lg:flex-row lg:px-6">
         <div className="flex items-center justify-between w-full gap-2 px-3 py-3 border-b border-gray-200 dark:border-gray-800 sm:gap-4 lg:justify-normal lg:border-b-0 lg:px-0 lg:py-4">
           {/* Sidebar toggle */}
@@ -95,6 +116,7 @@ const AppHeader: React.FC = () => {
                 localStorage.getItem("token") || Cookies.get("token");
               if (token) navigate("/task", { replace: true });
               else navigate("/signin", { replace: true });
+              setApplicationMenuOpen(false); // ✅ Tutup otomatis setelah klik logo
             }}
           >
             <span className="text-lg font-bold text-gray-800 dark:text-white">
@@ -104,14 +126,12 @@ const AppHeader: React.FC = () => {
 
           <div
             className="hidden lg:flex items-center gap-3 cursor-pointer"
-onClick={() => {
-  const token = Cookies.get("token");
-  if (token) {
-    navigate("/task");
-  } else {
-    navigate("/signin");
-  }
-}}
+            onClick={() => {
+              const token = Cookies.get("token");
+              if (token) navigate("/task");
+              else navigate("/signin");
+              setApplicationMenuOpen(false); // ✅ Tutup otomatis setelah klik logo
+            }}
           >
             <span className="text-xl font-bold text-gray-800 dark:text-white">
               Info Tugas
@@ -142,11 +162,15 @@ onClick={() => {
         {/* Menu kanan */}
         <div
           className={`${
-            isApplicationMenuOpen ? "flex" : "hidden"
+            isApplicationMenuOpen ? "flex animate-fadeIn" : "hidden"
           } items-center justify-between w-full gap-4 px-5 py-4 lg:flex shadow-theme-md lg:justify-end lg:px-0 lg:shadow-none`}
         >
           <div className="flex items-center gap-2 2xsm:gap-3">
-            <ThemeToggleButton />
+            <div
+              onClick={() => setApplicationMenuOpen(false)} // ✅ Tutup otomatis setelah pilih tema
+            >
+              <ThemeToggleButton />
+            </div>
             <button
               onClick={handleLogout}
               className="flex items-center gap-3 px-3 py-2 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
@@ -171,6 +195,8 @@ onClick={() => {
           </div>
         </div>
       </div>
+
+
     </header>
   );
 };

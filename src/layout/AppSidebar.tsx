@@ -16,7 +16,6 @@ type NavItem = {
   subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
 };
 
-
 const navItems: NavItem[] = [
   {
     icon: <BoxIcon />,
@@ -26,13 +25,14 @@ const navItems: NavItem[] = [
   {
     icon: <UserIcon />,
     name: "Profile",
-    path: "/Profile",
+    path: "/profile",
   },
 ];
 const othersItems: NavItem[] = [];
 
 const AppSidebar: React.FC = () => {
-  const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
+  const { isExpanded, isMobileOpen, isHovered, setIsHovered, closeSidebar } =
+    useSidebar();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -45,7 +45,6 @@ const AppSidebar: React.FC = () => {
   );
   const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-  // const isActive = (path: string) => location.pathname === path;
   const isActive = useCallback(
     (path: string) => location.pathname === path,
     [location.pathname]
@@ -100,6 +99,11 @@ const AppSidebar: React.FC = () => {
     });
   };
 
+  const handleNavigate = (path: string) => {
+    navigate(path);
+    if (isMobileOpen) closeSidebar();
+  };
+
   const renderMenuItems = (items: NavItem[], menuType: "main" | "others") => (
     <ul className="flex flex-col gap-4">
       {items.map((nav, index) => (
@@ -108,7 +112,7 @@ const AppSidebar: React.FC = () => {
             <button
               onClick={() => {
                 if (nav.path) {
-                  navigate(nav.path);
+                  handleNavigate(nav.path);
                 }
                 handleSubmenuToggle(index, menuType);
               }}
@@ -148,6 +152,9 @@ const AppSidebar: React.FC = () => {
           ) : nav.path ? (
             <Link
               to={nav.path}
+              onClick={() => {
+                if (isMobileOpen) closeSidebar();
+              }}
               className={`menu-item group ${
                 isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"
               }`}
@@ -164,10 +171,6 @@ const AppSidebar: React.FC = () => {
               {(isExpanded || isHovered || isMobileOpen) && (
                 <span className="menu-item-text">{nav.name}</span>
               )}
-              {/* Tampilkan chevron jika ada subItems */}
-              {nav.subItems && (isExpanded || isHovered || isMobileOpen) && (
-                <ChevronDownIcon className="ml-auto w-5 h-5" />
-              )}
             </Link>
           ) : null}
           {nav.subItems && (isExpanded || isHovered || isMobileOpen) && (
@@ -178,7 +181,8 @@ const AppSidebar: React.FC = () => {
               className="overflow-hidden transition-all duration-300"
               style={{
                 height:
-                  openSubmenu?.type === menuType && openSubmenu?.index === index
+                  openSubmenu?.type === menuType &&
+                  openSubmenu?.index === index
                     ? `${subMenuHeight[`${menuType}-${index}`]}px`
                     : "0px",
               }}
@@ -188,6 +192,9 @@ const AppSidebar: React.FC = () => {
                   <li key={subItem.name}>
                     <Link
                       to={subItem.path}
+                      onClick={() => {
+                        if (isMobileOpen) closeSidebar();
+                      }}
                       className={`menu-dropdown-item ${
                         isActive(subItem.path)
                           ? "menu-dropdown-item-active"
@@ -245,6 +252,7 @@ const AppSidebar: React.FC = () => {
       onMouseEnter={() => !isExpanded && setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
+      {/* LOGO */}
       <div
         className={`py-8 flex ${
           !isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
@@ -252,15 +260,14 @@ const AppSidebar: React.FC = () => {
       >
         <div
           className="flex items-center cursor-pointer"
-onClick={() => {
-  const token = Cookies.get("token");
-  if (token) {
-    navigate("/task");
-  } else {
-    navigate("/signin");
-  }
-}}
-
+          onClick={() => {
+            const token = Cookies.get("token");
+            if (token) {
+              handleNavigate("/task");
+            } else {
+              handleNavigate("/signin");
+            }
+          }}
         >
           {isExpanded || isHovered || isMobileOpen ? (
             <>
@@ -285,6 +292,8 @@ onClick={() => {
           )}
         </div>
       </div>
+
+      {/* NAVIGATION */}
       <div className="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
         <nav className="mb-6">
           <div className="flex flex-col gap-4">
@@ -306,7 +315,6 @@ onClick={() => {
             </div>
           </div>
         </nav>
-        {isExpanded || isHovered || isMobileOpen ? null : null}
       </div>
     </aside>
   );
