@@ -172,7 +172,7 @@ toast.success(`Login Berhasil, Hai ${fullname}👋`, {
                   {task.matkul}
                 </span>
                 <span className="text-xs text-gray-500 dark:text-gray-400">
-                  Deadline: {new Date(task.deadline).toLocaleDateString()}
+               Deadline: {new Date(task.deadline).toLocaleDateString("id-ID", { timeZone: "UTC" })}
                 </span>
               </div>
               <h3 className="text-lg font-bold text-gray-900 dark:text-white">

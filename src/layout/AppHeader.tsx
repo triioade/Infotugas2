@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import { useSidebar } from "../context/SidebarContext";
 import { ThemeToggleButton } from "../components/common/ThemeToggleButton";
-
+import DownloadButton from "../components/ui/button/downloadbutton";
 
 const AppHeader: React.FC = () => {
   const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
@@ -192,6 +192,7 @@ const AppHeader: React.FC = () => {
               </svg>
               Sign out
             </button>
+            <DownloadButton />
           </div>
         </div>
       </div>
