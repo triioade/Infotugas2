@@ -23,7 +23,12 @@ const DownloadButton: React.FC = () => {
 
   const handleClick = () => {
     if (platform === "ios" && !isInstalled) {
-      alert("👉 Tambahkan ke Home Screen melalui Safari untuk instalasi PWA.");
+      alert(
+  "📌 Untuk menginstal aplikasi ini di iPhone:\n\n" +
+  "1. Buka menu Safari (ikon kotak dengan panah ke atas).\n" +
+  "2. Pilih 'Add to Home Screen' atau 'Tambahkan ke Layar Utama'.\n" +
+  "3. Ikon aplikasi akan muncul di Home Screen, dan kamu bisa membukanya seperti aplikasi biasa."
+);
     } else if (platform === "android") {
       window.location.href = "https://drive.google.com/drive/folders/1Ai_y8tIV8YdaOd7okWZa_IhpPJ0hyx6d"; 
     } else if (platform === "desktop") {

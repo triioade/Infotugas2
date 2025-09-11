@@ -42,7 +42,7 @@ const AppHeader: React.FC = () => {
     navigate("/signin", { replace: true });
   };
 
-  // ✅ Tutup otomatis saat klik di luar header
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
