@@ -3,6 +3,9 @@ import axios from "axios";
 import { ThreeDot } from "react-loading-indicators";
 import { parseISO, differenceInMilliseconds } from "date-fns";
 import toast from "react-hot-toast";
+import PullToRefresh from "pulltorefreshjs";
+import { App } from "@capacitor/app";
+import type { PluginListenerHandle } from '@capacitor/core';
 
 interface Task {
   taskId: string;
@@ -97,6 +100,39 @@ toast.success(`Login Berhasil, Hai ${fullname}👋`, {
     setLoading(false);
   };
 
+useEffect(() => {
+
+  PullToRefresh.init({
+    mainElement: "body",
+    onRefresh() {
+      const token = localStorage.getItem("token");
+      if (token) return fetchTasks(token);
+    },
+  });
+
+  return () => PullToRefresh.destroyAll();
+}, []);
+
+
+useEffect(() => {
+  let listenerHandle: PluginListenerHandle;
+
+  const setupListener = async () => {
+    listenerHandle = await App.addListener("resume", () => {
+        console.log("App resumed")
+      const token = localStorage.getItem("token");
+      if (token) fetchTasks(token);
+    });
+  };
+
+  setupListener();
+
+  return () => {
+    if (listenerHandle) listenerHandle.remove();
+  };
+}, []);
+
+  
   const handleChangeStatus = (taskId: string, currentStatus: boolean) => {
     setTasks((prevTasks) =>
       prevTasks.map((task) =>
@@ -104,7 +140,7 @@ toast.success(`Login Berhasil, Hai ${fullname}👋`, {
       )
     );
 
-    const token = localStorage.getItem("token"); // ✅ ganti cookies → localStorage
+    const token = localStorage.getItem("token"); 
     axios
       .post(
         `${API_URL}/task/status/${taskId}`,

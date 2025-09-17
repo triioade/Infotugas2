@@ -9,6 +9,12 @@ import UpdateEmailPage from "./pages/email/email";
 import ProtectedRoute from "./protectroute"; 
 import HomeRedirect from "./pages/Home/home";
 import { Toaster } from "react-hot-toast";
+import AbsenPage from "./pages/absen/absen";
+
+
+// ./gradlew assembleRelease
+
+
 
 export default function App() {
   return (
@@ -29,10 +35,11 @@ export default function App() {
          <Route path="/" element={<HomeRedirect />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
-        
+
 
         {/* Protected Routes inside Dashboard Layout */}
         <Route element={<AppLayout />}>
+          <Route path="/absen" element={<AbsenPage />} />
           <Route
             path="/task"
             element={
