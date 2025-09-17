@@ -39,7 +39,14 @@ export default function App() {
 
         {/* Protected Routes inside Dashboard Layout */}
         <Route element={<AppLayout />}>
-          <Route path="/absen" element={<AbsenPage />} />
+          <Route
+            path="/absen"
+            element={
+              <ProtectedRoute>
+                <AbsenPage />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/task"
             element={
