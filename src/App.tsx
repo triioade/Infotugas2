@@ -7,7 +7,7 @@ import { ScrollToTop } from "./components/common/ScrollToTop";
 import TaskUserPage from "./pages/Task/Taskuser";
 import UpdateEmailPage from "./pages/email/email";
 import ProtectedRoute from "./protectroute"; 
-import HomeRedirect from "./pages/Home/home"; // versi ini dipakai
+// import HomeRedirect from "./pages/Home/home"; // versi ini dipakai
 import { Toaster } from "react-hot-toast";
 import AbsenPage from "./pages/absen/absen";
 
