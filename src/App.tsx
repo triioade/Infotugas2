@@ -29,12 +29,20 @@ export default function App() {
 
       <Routes>
         {/* Public Routes */}
-        <Route path="/" element={<HomeRedirect />} />
+        
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
 
         {/* Protected Routes inside Dashboard Layout */}
         <Route element={<AppLayout />}>
+                  <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <TaskUserPage />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/task"
             element={
