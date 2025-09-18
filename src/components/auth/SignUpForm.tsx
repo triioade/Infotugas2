@@ -7,7 +7,7 @@ import Input from "../form/input/InputField";
 import Checkbox from "../form/input/Checkbox";
 import Button from "../ui/button/Button";
 import axios from "axios";
-import { API_URL } from "../../utils/APIURL";
+import API_URL from "../../utils/APIURL";
 import toast from "react-hot-toast";
 
 
