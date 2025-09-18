@@ -13,72 +13,15 @@
 
     <!-- iOS support -->
     <link rel="apple-touch-icon" href="/icons/apple-icon-180.png" />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="Info Tugas" />
-
-    <style>
-      /* Spinner fallback biar nggak blank */
-      #root {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 100vh;
-        background: #fff;
-      }
-      .spinner {
-        width: 40px;
-        height: 40px;
-        border: 4px solid #2563eb;
-        border-top: transparent;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-      }
-      @keyframes spin {
-        to {
-          transform: rotate(360deg);
-        }
-      }
-    </style>
+    <meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Info Tugas">
   </head>
   <body class="dark:bg-gray-900">
-    <div id="root">
-      <div class="spinner"></div>
-    </div>
-
-    <script>
-      (function () {
-        // 🚀 Versi aplikasi - ubah tiap kali deploy baru
-        const APP_VERSION = "1.0.5";
-        const savedVersion = localStorage.getItem("app_version");
-
-        if (savedVersion !== APP_VERSION) {
-          // backup token
-          const token = localStorage.getItem("token");
-
-          // clear storage lama
-          localStorage.clear();
-
-          // restore token biar user nggak logout
-          if (token) localStorage.setItem("token", token);
-
-          // simpan versi baru
-          localStorage.setItem("app_version", APP_VERSION);
-
-          // reload biar load file terbaru
-          window.location.reload(true);
-        }
-
-        // 🚀 Unregister service worker lama (kalau ada PWA nyangkut)
-        if ("serviceWorker" in navigator) {
-          navigator.serviceWorker.getRegistrations().then((regs) => {
-            regs.forEach((reg) => reg.unregister());
-          });
-        }
-      })();
-    </script>
-
+    <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
