@@ -5,7 +5,7 @@ import { parseISO, differenceInMilliseconds } from "date-fns";
 import toast from "react-hot-toast";
 import PullToRefresh from "pulltorefreshjs";
 import { App } from "@capacitor/app";
-import type { PluginListenerHandle } from '@capacitor/core';
+import type { PluginListenerHandle } from "@capacitor/core";
 
 interface Task {
   taskId: string;
@@ -36,7 +36,9 @@ function Countdown({ deadline }: { deadline: string }) {
   }
 
   const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
-  const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const hours = Math.floor(
+    (timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+  );
   const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
   const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
 
@@ -52,26 +54,26 @@ export default function TaskPage() {
     const msg = localStorage.getItem("loginSuccess");
     const fullname = localStorage.getItem("fullname");
     if (msg && fullname) {
-toast.success(`Login Berhasil, Hai ${fullname}👋`, {
-  id: "login-success", 
-  style: {
-    background: "var(--color-brand-500, #2563eb)",
-    color: "#fff",
-    borderRadius: "0.75rem",
-    fontWeight: 500,
-    whiteSpace: "nowrap",    
-    overflow: "hidden",      
-    textOverflow: "ellipsis",
-    maxWidth: "280px",  
-  },
-  iconTheme: {
-    primary: "var(--color-brand-500, #2563eb)",
-    secondary: "#fff",
-  },
-  className: "dark:bg-brand-500 dark:text-white",
-});
+      toast.success(`Login Berhasil, Hai ${fullname}👋`, {
+        id: "login-success",
+        style: {
+          background: "var(--color-brand-500, #2563eb)",
+          color: "#fff",
+          borderRadius: "0.75rem",
+          fontWeight: 500,
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          maxWidth: "280px",
+        },
+        iconTheme: {
+          primary: "var(--color-brand-500, #2563eb)",
+          secondary: "#fff",
+        },
+        className: "dark:bg-brand-500 dark:text-white",
+      });
 
-      localStorage.removeItem("loginSuccess"); 
+      localStorage.removeItem("loginSuccess");
     }
   }, []);
 
@@ -91,48 +93,54 @@ toast.success(`Login Berhasil, Hai ${fullname}👋`, {
       const res = await axios.get(`${API_URL}/task`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      
+
       setTasks(res.data.data);
-    } catch (err) {
-      console.error("Gagal fetch tugas:", err);
+    } catch (err: any) {
+      if (err.response?.status === 401) {
+        toast.error("Sesi login berakhir, silakan login ulang", {
+          id: "token-expired",
+        });
+        localStorage.removeItem("token");
+      } else {
+        toast.error("Gagal memuat daftar tugas", {
+          id: "fetch-error",
+        });
+      }
       setTasks([]);
     }
     setLoading(false);
   };
 
-useEffect(() => {
-
-  PullToRefresh.init({
-    mainElement: "body",
-    onRefresh() {
-      const token = localStorage.getItem("token");
-      if (token) return fetchTasks(token);
-    },
-  });
-
-  return () => PullToRefresh.destroyAll();
-}, []);
-
-
-useEffect(() => {
-  let listenerHandle: PluginListenerHandle;
-
-  const setupListener = async () => {
-    listenerHandle = await App.addListener("resume", () => {
-        console.log("App resumed")
-      const token = localStorage.getItem("token");
-      if (token) fetchTasks(token);
+  useEffect(() => {
+    PullToRefresh.init({
+      mainElement: "body",
+      onRefresh() {
+        const token = localStorage.getItem("token");
+        if (token) return fetchTasks(token);
+      },
     });
-  };
 
-  setupListener();
+    return () => PullToRefresh.destroyAll();
+  }, []);
 
-  return () => {
-    if (listenerHandle) listenerHandle.remove();
-  };
-}, []);
+  useEffect(() => {
+    let listenerHandle: PluginListenerHandle;
 
-  
+    const setupListener = async () => {
+      listenerHandle = await App.addListener("resume", () => {
+        console.log("App resumed");
+        const token = localStorage.getItem("token");
+        if (token) fetchTasks(token);
+      });
+    };
+
+    setupListener();
+
+    return () => {
+      if (listenerHandle) listenerHandle.remove();
+    };
+  }, []);
+
   const handleChangeStatus = (taskId: string, currentStatus: boolean) => {
     setTasks((prevTasks) =>
       prevTasks.map((task) =>
@@ -140,7 +148,7 @@ useEffect(() => {
       )
     );
 
-    const token = localStorage.getItem("token"); 
+    const token = localStorage.getItem("token");
     axios
       .post(
         `${API_URL}/task/status/${taskId}`,
@@ -152,14 +160,23 @@ useEffect(() => {
           },
         }
       )
-      .catch((err) => {
+      .catch((err: any) => {
         setTasks((prevTasks) =>
           prevTasks.map((task) =>
             task.taskId === taskId ? { ...task, status: currentStatus } : task
           )
         );
-        alert("Gagal mengubah status tugas");
-        console.error("Status update failed:", err);
+
+        if (err.response?.status === 401) {
+          toast.error("Sesi login berakhir, silakan login ulang", {
+            id: "token-expired",
+          });
+          localStorage.removeItem("token");
+        } else {
+          toast.error("Gagal mengubah status tugas", {
+            id: "status-error",
+          });
+        }
       });
   };
 
@@ -208,7 +225,10 @@ useEffect(() => {
                   {task.matkul}
                 </span>
                 <span className="text-xs text-gray-500 dark:text-gray-400">
-               Deadline: {new Date(task.deadline).toLocaleDateString("id-ID", { timeZone: "UTC" })}
+                  Deadline:{" "}
+                  {new Date(task.deadline).toLocaleDateString("id-ID", {
+                    timeZone: "UTC",
+                  })}
                 </span>
               </div>
               <h3 className="text-lg font-bold text-gray-900 dark:text-white">
@@ -232,9 +252,7 @@ useEffect(() => {
                       ? "bg-green-500 text-white"
                       : "bg-gray-300 text-gray-700 hover:bg-blue-500 hover:text-white"
                   }`}
-                  onClick={() =>
-                    handleChangeStatus(task.taskId, task.status)
-                  }
+                  onClick={() => handleChangeStatus(task.taskId, task.status)}
                 >
                   {task.status ? "Sudah Dikerjakan" : "Tandai Selesai"}
                 </button>

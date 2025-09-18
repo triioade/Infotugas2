@@ -80,7 +80,7 @@ export default function AbsenPage() {
 
       {/* mahasiswa ori*/}
       {activeTab === "absen" && (
-        <div className="animate-fade-in-up overflow-auto rounded shadow border border-gray-300 dark:border-gray-600 max-w-3xl mx-auto">
+        <div className="animate-fade-in-up overflow-auto rounded shadow border border-gray-300 dark:border-gray-600 max-w-3xl ml-0">
           <table className="w-full text-sm text-left text-gray-700 dark:text-gray-300">
             <thead className="bg-gray-100 dark:bg-gray-800">
               <tr>
@@ -107,7 +107,7 @@ export default function AbsenPage() {
 
       {/* revisi */}
       {activeTab === "revisi" && (
-        <div className="animate-fade-in-up overflow-auto rounded shadow border border-gray-300 dark:border-gray-600 max-w-3xl mx-auto">
+        <div className="animate-fade-in-up overflow-auto rounded shadow border border-gray-300 dark:border-gray-600 max-w-3xl w-full">
           <table className="w-full text-sm text-left text-gray-700 dark:text-gray-300">
             <thead className="bg-gray-100 dark:bg-gray-800">
               <tr>
