@@ -11,48 +11,50 @@ import ProtectedRoute from "./protectroute";
 import { Toaster, toast } from "react-hot-toast";
 import AbsenPage from "./pages/absen/absen";
 
+import { useRegisterSW } from "virtual:pwa-register/react";
+
 export default function App() {
-  // 🔄 Auto-refresh kalau ada versi baru
+
+  const {
+    needRefresh: [needRefresh, setNeedRefresh],
+    offlineReady: [offlineReady, setOfflineReady],
+    updateServiceWorker,
+  } = useRegisterSW({
+    onRegistered(r) {
+      console.log("✅ Service Worker registered:", r);
+    },
+    onRegisterError(err) {
+      console.error("❌ Service Worker registration error:", err);
+    },
+  });
+
   useEffect(() => {
-    let currentVersion: string | null = null;
+    if (offlineReady) {
+      toast.success("App siap digunakan offline ✨");
+      setOfflineReady(false);
+    }
+  }, [offlineReady, setOfflineReady]);
 
-    const checkVersion = async () => {
-      try {
-        const res = await fetch("/version.json", { cache: "no-store" });
-        if (!res.ok) return;
+  useEffect(() => {
+    if (needRefresh) {
+      toast((t) => (
+        <div className="flex flex-col gap-2">
+          <span className="font-medium">Versi baru tersedia 🚀</span>
+          <button
+            onClick={() => {
+              toast.dismiss(t.id);
+              updateServiceWorker(true); // aktifkan SW baru & reload
+            }}
+            className="px-3 py-1 bg-blue-600 text-white rounded-md text-sm"
+          >
+            Refresh Sekarang
+          </button>
+        </div>
+      ), { duration: 10000 });
 
-        const data = await res.json();
-        if (data?.version) {
-          if (!currentVersion) {
-            currentVersion = data.version;
-          } else if (currentVersion !== data.version) {
-            toast((t) => (
-              <div className="flex flex-col gap-2">
-                <span className="font-medium">
-                  Versi baru tersedia 🚀
-                </span>
-                <button
-                  onClick={() => {
-                    toast.dismiss(t.id);
-                    window.location.reload();
-                  }}
-                  className="px-3 py-1 bg-blue-600 text-white rounded-md text-sm"
-                >
-                  Refresh Sekarang
-                </button>
-              </div>
-            ), { duration: 10000 });
-          }
-        }
-      } catch (err) {
-        console.error("Gagal cek versi:", err);
-      }
-    };
-
-    checkVersion();
-    const interval = setInterval(checkVersion, 30000); // cek tiap 30 detik
-    return () => clearInterval(interval);
-  }, []);
+      setNeedRefresh(false);
+    }
+  }, [needRefresh, setNeedRefresh, updateServiceWorker]);
 
   return (
     <Router>
@@ -60,19 +62,15 @@ export default function App() {
       <Toaster
         position="top-center"
         reverseOrder={false}
-        toastOptions={{
-          style: {
-            marginTop: "80px",
-          },
-        }}
+        toastOptions={{ style: { marginTop: "80px" } }}
       />
 
       <Routes>
-        {/* Public Routes */}
+        {/* Public */}
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
 
-        {/* Protected Routes inside Dashboard Layout */}
+        {/* Protected */}
         <Route element={<AppLayout />}>
           <Route
             path="/"
@@ -106,8 +104,6 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-
-          {/* 404 */}
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>

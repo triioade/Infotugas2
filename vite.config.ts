@@ -13,44 +13,64 @@ export default defineConfig({
         namedExport: "ReactComponent",
       },
     }),
-VitePWA({
-  registerType: "autoUpdate",
-  devOptions: {
-    enabled: true,
-  },
-  workbox: {
-    skipWaiting: true,
-    clientsClaim: true,
-  },
-  manifest: {
-    name: "Info Tugas",
-    short_name: "InfoTugas",
-    description: "Dashboard Mahasiswa untuk memantau tugas kuliah",
-    theme_color: "#2b4539",
-    background_color: "#ffffff",
-    display: "standalone",
-    scope: "/",
-    start_url: "/",
-    icons: [
-      {
-        src: "/icons/pwa-192x192.png",
+    VitePWA({
+      registerType: "autoUpdate", // 🔄 auto update service worker
+      devOptions: {
+        enabled: true, // aktif saat development juga
+      },
+      workbox: {
+        skipWaiting: true, // langsung replace SW lama
+        clientsClaim: true, // claim client tanpa reload manual
+        runtimeCaching: [
+          {
+            urlPattern: ({ request }) => request.destination === "image",
+            handler: "CacheFirst",
+            options: {
+              cacheName: "image-cache",
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60 * 24 * 7, // 1 minggu
+              },
+            },
+          },
+          {
+            urlPattern: /^https:\/\/api\.example\.com\/.*$/, // contoh API
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "api-cache",
+              networkTimeoutSeconds: 10,
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60, // 1 jam
+              },
+            },
+          },
+        ],
+      },
+      manifest: {
+        name: "Info Tugas",
+        short_name: "InfoTugas",
+        description: "Dashboard Mahasiswa untuk memantau tugas kuliah",
+        theme_color: "#2b4539",
+        background_color: "#ffffff",
+        display: "standalone",
+        scope: "/",
+        start_url: "/",
+        icons: [
+ {
+        src: "/icons/manifest-icon-192.maskable.png",
         sizes: "192x192",
         type: "image/png",
+        purpose: "any maskable"
       },
       {
-        src: "/icons/pwa-512x512.png",
+        src: "/icons/manifest-icon-512.maskable.png",
         sizes: "512x512",
         type: "image/png",
+        purpose: "any maskable"
       },
-      {
-        src: "/icons/pwa-512x512.png",
-        sizes: "512x512",
-        type: "image/png",
-        purpose: "any maskable",
+        ],
       },
-    ],
-  },
-})
-
+    }),
   ],
 });
