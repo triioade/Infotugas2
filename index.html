@@ -7,113 +7,18 @@
 
     <title>Info Tugas | Dashboard Mahasiswa</title>
 
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="/manifest.json" />
+    <!-- PWA manifest (vite-plugin-pwa akan generate/serve ini) -->
+    <link rel="manifest" href="/manifest.webmanifest" />
     <meta name="theme-color" content="#2b4539" />
 
-    <!-- iOS support -->
+    <!-- iOS PWA support -->
     <link rel="apple-touch-icon" href="/icons/apple-icon-180.png" />
-    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Info Tugas" />
   </head>
   <body class="dark:bg-gray-900">
     <div id="root"></div>
-    
     <script type="module" src="/src/main.tsx"></script>
-
-<!-- setelah tag module script (mis. <script type="module" src="/src/main.tsx"></script>) -->
-<script>
-(function () {
-  const FLAG = "app_script_checked_v2";
-
-  // jangan jalanin ulang setelah sudah reload sekali di session ini
-  if (sessionStorage.getItem(FLAG)) return;
-
-  // cari script module yang punya src (biasanya Vite hasil build akan menaruh module script)
-  const moduleScript = Array.from(document.scripts).find(
-    (s) => s.type === "module" && s.src
-  );
-
-  if (!moduleScript) {
-    // tidak ada module script terdeteksi — nothing to check
-    return;
-  }
-
-  // ambil URL script (absolute atau relative)
-  const scriptUrl = moduleScript.src;
-
-  // fungsi bersihin cache & unregister SW
-  async function clearAllCachesAndSW() {
-    try {
-      if ("caches" in window) {
-        const keys = await caches.keys();
-        await Promise.all(keys.map((k) => caches.delete(k)));
-        console.info("[update] caches cleared:", keys);
-      }
-    } catch (e) {
-      console.warn("[update] gagal clear caches:", e);
-    }
-
-    try {
-      if ("serviceWorker" in navigator) {
-        const regs = await navigator.serviceWorker.getRegistrations();
-        await Promise.all(regs.map((r) => r.unregister()));
-        console.info("[update] service workers unregistered");
-      }
-    } catch (e) {
-      console.warn("[update] gagal unregister service worker:", e);
-    }
-  }
-
-  // cek resource script secara eksplisit tanpa cache
-  (async function checkScript() {
-    try {
-      const res = await fetch(scriptUrl, { cache: "no-store", credentials: "same-origin" });
-
-      const contentType = (res.headers.get("content-type") || "").toLowerCase();
-      // kondisi: response bukan ok OR content-type mengindikasikan html
-      if (!res.ok || contentType.includes("text/html")) {
-        // double-check: ambil text dan cek apakah dia HTML (start with "<")
-        let body = "";
-        try {
-          body = await res.text();
-        } catch (e) {
-          console.warn("[update] gagal baca body:", e);
-        }
-
-        const looksLikeHtml = typeof body === "string" && body.trim().startsWith("<");
-
-        if (!res.ok || contentType.includes("text/html") || looksLikeHtml) {
-          console.warn("[update] Detected script response is HTML or invalid. Forcing cache clear + reload.", { scriptUrl, contentType });
-          
-          // set flag supaya tidak loop
-          sessionStorage.setItem(FLAG, "1");
-
-          // tampil log sebelum reload (bisa diganti dengan UI spinner)
-          await clearAllCachesAndSW();
-
-          // beri jeda kecil supaya UI render spinner/fallback di index.html kalau ada
-          setTimeout(() => {
-            // paksa reload dari network
-            try { window.location.reload(true); } catch(e){ window.location.href = window.location.href; }
-          }, 300);
-          return;
-        }
-      }
-
-      // kalau sampai sini OK, asset script valid — tidak perlu reload
-      console.info("[update] main script OK:", scriptUrl, contentType);
-    } catch (err) {
-      console.warn("[update] gagal fetch script, kemungkinan network/service error:", err);
-      // opsi: kita tidak langsung reload bila fetch gagal sekali (untuk menghindari reload loop di network down).
-      // tapi jika mau lebih agresif, uncomment berikut:
-      // sessionStorage.setItem(FLAG, "1"); clearAllCachesAndSW().then(()=>window.location.reload(true));
-    }
-  })();
-})();
-</script>
-
   </body>
 </html>
