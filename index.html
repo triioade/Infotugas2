@@ -22,5 +22,20 @@
     <div id="root"></div>
     
     <script type="module" src="/src/main.tsx"></script>
+
+    <script>
+  // Deteksi gagal load JS (misalnya MIME type salah)
+  window.addEventListener("error", (e) => {
+    if (e.target.tagName === "SCRIPT") {
+      console.warn("Script gagal dimuat, paksa reload cache...");
+      // Bersihin semua cache service worker + localStorage build lama
+      if ('caches' in window) {
+        caches.keys().then(names => names.forEach(n => caches.delete(n)));
+      }
+      // Paksa reload fresh
+      window.location.reload(true);
+    }
+  }, true);
+</script>
   </body>
 </html>
