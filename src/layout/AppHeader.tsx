@@ -114,7 +114,7 @@ const AppHeader: React.FC = () => {
             onClick={() => {
               const token =
                 localStorage.getItem("token") || Cookies.get("token");
-              if (token) navigate("/task", { replace: true });
+              if (token) navigate("/", { replace: true });
               else navigate("/signin", { replace: true });
               setApplicationMenuOpen(false); // ✅ Tutup otomatis setelah klik logo
             }}

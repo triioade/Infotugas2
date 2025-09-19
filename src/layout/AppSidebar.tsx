@@ -269,7 +269,7 @@ const AppSidebar: React.FC = () => {
           onClick={() => {
             const token = Cookies.get("token");
             if (token) {
-              handleNavigate("/task");
+              handleNavigate("/");
             } else {
               handleNavigate("/signin");
             }
