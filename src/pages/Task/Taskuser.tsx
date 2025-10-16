@@ -87,29 +87,70 @@ export default function TaskPage() {
     }
   }, []);
 
-  const fetchTasks = async (token: string) => {
-    setLoading(true);
-    try {
-      const res = await axios.get(`${API_URL}/task`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+const CACHE_KEY = "cachedTasks";
+const CACHE_TIME_KEY = "cachedTime";
+const CACHE_DURATION = 5 * 60 * 1000; // 5 menit (dalam ms)
 
-      setTasks(res.data.data);
-    } catch (err: any) {
-      if (err.response?.status === 401) {
-        toast.error("Sesi login berakhir, silakan login ulang", {
-          id: "token-expired",
-        });
-        localStorage.removeItem("token");
-      } else {
-        toast.error("Gagal memuat daftar tugas", {
-          id: "fetch-error",
-        });
+const fetchTasks = async (token: string) => {
+  setLoading(true);
+
+  try {
+    // ✅ 1. Coba ambil data dari cache dulu
+    const cachedData = localStorage.getItem(CACHE_KEY);
+    const cachedTime = localStorage.getItem(CACHE_TIME_KEY);
+
+    if (cachedData && cachedTime) {
+      const now = Date.now();
+      const age = now - Number(cachedTime);
+
+      // Kalau cache masih valid (<5 menit), tampilkan dulu ke user
+      if (age < CACHE_DURATION) {
+        setTasks(JSON.parse(cachedData));
+        setLoading(false);
       }
-      setTasks([]);
     }
+
+
+    const res = await axios.get(`${API_URL}/task`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    const newData = res.data.data;
+
+
+    const oldData = localStorage.getItem(CACHE_KEY);
+    const isDifferent = JSON.stringify(newData) !== oldData;
+
+    if (isDifferent) {
+      
+      console.log("🔄 Data baru terdeteksi, memperbarui cache...");
+      setTasks(newData);
+      localStorage.setItem(CACHE_KEY, JSON.stringify(newData));
+      localStorage.setItem(CACHE_TIME_KEY, Date.now().toString());
+    } else {
+
+      console.log("✅ Data masih sama, memperbarui waktu cache...");
+      localStorage.setItem(CACHE_TIME_KEY, Date.now().toString());
+    }
+
+  } catch (err: any) {
+    if (err.response?.status === 401) {
+      toast.error("Sesi login berakhir, silakan login ulang", { id: "token-expired" });
+      localStorage.removeItem("token");
+    } else {
+      toast.error("Gagal memuat daftar tugas", { id: "fetch-error" });
+    }
+
+   
+    const fallback = localStorage.getItem(CACHE_KEY);
+    if (fallback) setTasks(JSON.parse(fallback));
+    else setTasks([]);
+
+  } finally {
     setLoading(false);
-  };
+  }
+};
+
 
   useEffect(() => {
     PullToRefresh.init({
