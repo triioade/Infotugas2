@@ -89,51 +89,57 @@ export default function TaskPage() {
 
 const CACHE_KEY = "cachedTasks";
 const CACHE_TIME_KEY = "cachedTime";
-const CACHE_DURATION = 5 * 60 * 1000; // 5 menit (dalam ms)
+const CACHE_DURATION = 5 * 60 * 1000; // 5 menit
 
 const fetchTasks = async (token: string) => {
-  setLoading(true);
-
   try {
-    // ✅ 1. Coba ambil data dari cache dulu
     const cachedData = localStorage.getItem(CACHE_KEY);
     const cachedTime = localStorage.getItem(CACHE_TIME_KEY);
+    const now = Date.now();
+    let initialDataShown = false;
 
-    if (cachedData && cachedTime) {
-      const now = Date.now();
-      const age = now - Number(cachedTime);
-
-      // Kalau cache masih valid (<5 menit), tampilkan dulu ke user
-      if (age < CACHE_DURATION) {
-        setTasks(JSON.parse(cachedData));
-        setLoading(false);
-      }
+    
+    if (cachedData && cachedTime && now - Number(cachedTime) < CACHE_DURATION) {
+      setTasks(JSON.parse(cachedData));
+      initialDataShown = true;
+    } else {
+      
+      setLoading(true);
     }
 
-
+    
     const res = await axios.get(`${API_URL}/task`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-
     const newData = res.data.data;
 
+    const oldData = cachedData ? JSON.parse(cachedData) : [];
+    const isDifferent = JSON.stringify(newData) !== JSON.stringify(oldData);
 
-    const oldData = localStorage.getItem(CACHE_KEY);
-    const isDifferent = JSON.stringify(newData) !== oldData;
-
+    
     if (isDifferent) {
+      console.log("Data Berubah");
       
-      console.log("🔄 Data baru terdeteksi, memperbarui cache...");
-      setTasks(newData);
+    
+      if (initialDataShown) setTasks([]);
+      setLoading(true);
+
+      setTimeout(() => {
+        setTasks(newData);
+        setLoading(false);
+      }, 700);
+
       localStorage.setItem(CACHE_KEY, JSON.stringify(newData));
       localStorage.setItem(CACHE_TIME_KEY, Date.now().toString());
     } else {
-
-      console.log("✅ Data masih sama, memperbarui waktu cache...");
+      console.log("Data Tidak Berubah");
       localStorage.setItem(CACHE_TIME_KEY, Date.now().toString());
+      if (!initialDataShown) setTasks(newData);
+      setLoading(false);
     }
-
   } catch (err: any) {
+    console.error("❌ Error fetching:", err);
+
     if (err.response?.status === 401) {
       toast.error("Sesi login berakhir, silakan login ulang", { id: "token-expired" });
       localStorage.removeItem("token");
@@ -141,15 +147,15 @@ const fetchTasks = async (token: string) => {
       toast.error("Gagal memuat daftar tugas", { id: "fetch-error" });
     }
 
-   
     const fallback = localStorage.getItem(CACHE_KEY);
     if (fallback) setTasks(JSON.parse(fallback));
     else setTasks([]);
 
-  } finally {
     setLoading(false);
   }
 };
+
+
 
 
   useEffect(() => {
