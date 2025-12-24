@@ -18,6 +18,20 @@ interface Task {
 
 const API_URL = import.meta.env.VITE_API_URL;
 
+// helper task doble / dupe
+const dedupeTasks = (tasks: Task[]): Task[] => {
+  const map = new Map<string, Task>();
+
+  tasks.forEach((task) => {
+    if (map.has(task.taskId)) {
+      console.warn("⚠️ Duplicate task detected:", task.taskId);
+    }
+    map.set(task.taskId, task);
+  });
+
+  return Array.from(map.values());
+};
+
 // Komponen Countdown
 function Countdown({ deadline }: { deadline: string }) {
   const [timeLeft, setTimeLeft] = useState(
@@ -87,9 +101,9 @@ export default function TaskPage() {
     }
   }, []);
 
-const CACHE_KEY = "cachedTasks";
-const CACHE_TIME_KEY = "cachedTime";
-const CACHE_DURATION = 5 * 60 * 1000; // 5 menit
+  const CACHE_KEY = "cachedTasks";
+  const CACHE_TIME_KEY = "cachedTime";
+  const CACHE_DURATION = 5 * 60 * 1000; // 5 menit
 
 const fetchTasks = async (token: string) => {
   try {
@@ -98,29 +112,33 @@ const fetchTasks = async (token: string) => {
     const now = Date.now();
     let initialDataShown = false;
 
-    
-    if (cachedData && cachedTime && now - Number(cachedTime) < CACHE_DURATION) {
-      setTasks(JSON.parse(cachedData));
+
+    if (
+      cachedData &&
+      cachedTime &&
+      now - Number(cachedTime) < CACHE_DURATION
+    ) {
+      setTasks(dedupeTasks(JSON.parse(cachedData)));
       initialDataShown = true;
     } else {
-      
       setLoading(true);
     }
 
-    
     const res = await axios.get(`${API_URL}/task`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    const newData = res.data.data;
+
+    const rawData = res.data.data || [];
+    const newData = dedupeTasks(rawData);
 
     const oldData = cachedData ? JSON.parse(cachedData) : [];
-    const isDifferent = JSON.stringify(newData) !== JSON.stringify(oldData);
+    const isDifferent =
+      JSON.stringify(newData) !== JSON.stringify(oldData);
 
-    
+
     if (isDifferent) {
-      console.log("Data Berubah");
-      
-    
+      console.log("✅ Data Berubah");
+
       if (initialDataShown) setTasks([]);
       setLoading(true);
 
@@ -129,10 +147,14 @@ const fetchTasks = async (token: string) => {
         setLoading(false);
       }, 700);
 
+
       localStorage.setItem(CACHE_KEY, JSON.stringify(newData));
       localStorage.setItem(CACHE_TIME_KEY, Date.now().toString());
-    } else {
-      console.log("Data Tidak Berubah");
+    } 
+
+    else {
+      console.log(" Data Tidak Berubah");
+
       localStorage.setItem(CACHE_TIME_KEY, Date.now().toString());
       if (!initialDataShown) setTasks(newData);
       setLoading(false);
@@ -141,21 +163,21 @@ const fetchTasks = async (token: string) => {
     console.error("❌ Error fetching:", err);
 
     if (err.response?.status === 401) {
-      toast.error("Sesi login berakhir, silakan login ulang", { id: "token-expired" });
+      toast.error("Sesi login berakhir, silakan login ulang", {
+        id: "token-expired",
+      });
       localStorage.removeItem("token");
     } else {
       toast.error("Gagal memuat daftar tugas", { id: "fetch-error" });
     }
 
     const fallback = localStorage.getItem(CACHE_KEY);
-    if (fallback) setTasks(JSON.parse(fallback));
+    if (fallback) setTasks(dedupeTasks(JSON.parse(fallback)));
     else setTasks([]);
 
     setLoading(false);
   }
 };
-
-
 
 
   useEffect(() => {
