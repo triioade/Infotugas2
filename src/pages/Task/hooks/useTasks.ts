@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import toast from "react-hot-toast";
 import { Task } from "../types";
 import { fetchTasksApi } from "../services/taskService";
