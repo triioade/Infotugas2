@@ -5,7 +5,7 @@ import SignUp from "./pages/AuthPages/SignUp";
 import NotFound from "./pages/OtherPage/NotFound";
 import AppLayout from "./layout/AppLayout";
 import { ScrollToTop } from "./components/common/ScrollToTop";
-import TaskUserPage from "./pages/Task/Taskuser";
+import TaskUserPage from "./pages/Task/Taskpage";
 import UpdateEmailPage from "./pages/email/email";
 import ProtectedRoute from "./protectroute";
 import { Toaster, toast } from "react-hot-toast";
