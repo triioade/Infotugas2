@@ -30,7 +30,7 @@ const DownloadButton: React.FC = () => {
   "3. Ikon aplikasi akan muncul di Home Screen, dan kamu bisa membukanya seperti aplikasi biasa."
 );
     } else if (platform === "android") {
-      window.location.href = "https://drive.google.com/drive/folders/1Ai_y8tIV8YdaOd7okWZa_IhpPJ0hyx6d"; 
+      window.location.href = "https://drive.google.com/drive/folders/1raVjX_EzDbJPRWof2EDogaVLK8yad83g?usp=sharing"; 
     } else if (platform === "desktop") {
       alert("🌐 Gunakan versi web di browser desktop.");
     }

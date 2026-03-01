@@ -192,7 +192,7 @@ const AppHeader: React.FC = () => {
               </svg>
               Sign out
             </button>
-            {/* <DownloadButton /> */}
+            <DownloadButton />
           </div>
         </div>
       </div>
